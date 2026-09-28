@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 01 — Learn It</title>
+<style>
+:root{--bg:#f7f8f5;--card:#fff;--ink:#1c2420;--mute:#5d6b63;--line:#dfe5df;--accent:#2f8f4e;--accent2:#e8f5ec;--warn:#b45309;--code:#101a14;--codeink:#c8f0d2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2}}
+:root[data-theme="dark"]{--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;overflow-x:auto;white-space:nowrap;padding:8px 16px}
+nav a{display:inline-block;margin-right:6px;padding:4px 12px;border-radius:99px;font-size:13px;color:var(--mute);text-decoration:none;border:1px solid var(--line)}
+nav a:hover{color:var(--accent);border-color:var(--accent)}
+.hero{padding:28px 0 8px}.tag{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.15;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 6px}
+section{margin-top:40px}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.eq{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.eq span{background:var(--accent2);border:1px solid var(--accent);border-radius:10px;padding:6px 12px;font-size:14px}
+.eq b{color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--accent2);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+button{font:inherit;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font-size:14px}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.out{min-height:60px}
+.pill{display:inline-block;background:var(--accent2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:3px 4px 3px 0;font-size:13px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.step{flex:1;min-width:38px;height:8px;border-radius:9px;background:var(--line);border:0;padding:0}
+.step.done{background:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:9px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.layers{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.layer{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 14px;text-align:left;color:var(--ink)}
+.layer.on{border-color:var(--accent);background:var(--accent2)}
+.arrow{text-align:center;color:var(--mute);line-height:1}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:6px;color:var(--accent)}
+dl{margin:0}dt{font-weight:700;margin-top:12px;color:var(--accent)}dd{margin:2px 0 0;color:var(--ink)}
+.note{border-left:4px solid var(--warn);padding:8px 14px;background:var(--card);border-radius:0 10px 10px 0;margin-top:12px;font-size:15px}
+.score{font-weight:700;color:var(--accent)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.opt.ok{border-color:var(--accent);background:var(--accent2)}.opt.bad{border-color:var(--warn)}
+</style>
+</head>
+<body>
+<nav>
+<a href="#big">Big idea</a><a href="#vs">Spring vs Boot</a><a href="#starter">Starters</a><a href="#auto">Auto-config</a><a href="#flow">Startup</a><a href="#arch">Architecture</a><a href="#gloss">Glossary</a><a href="#quiz">Quiz</a>
+</nav>
+<main>
+<div class="hero">
+<div class="tag">Doc 01 · GA_A-lock</div>
+<h1>What is Spring Boot?</h1>
+<p class="sub">An interactive study page for the backend of your authentication app. Click, toggle and test yourself.</p>
+</div>
+
+<section id="big">
+<h2>The big idea</h2>
+<p class="sub">Spring Boot is a Java framework for building production-ready apps fast, with less configuration.</p>
+<div class="card">
+<div class="eq"><span>Spring Framework</span><b>+</b><span>Sensible defaults</span><b>+</b><span>Auto-configuration</span><b>+</b><span>Embedded server</span><b>+</b><span>Easy setup</span><b>=</b><span style="background:var(--accent);color:#fff">Spring Boot</span></div>
+<p>Before Boot you hand-configured the server, database connection, component scanning, MVC and security. Now you declare <em>what you need</em> and write real logic, like this:</p>
+<pre><code>@RestController
+public class AuthController {
+    @PostMapping("/register")
+    public String register() {
+        return "User registered successfully";
+    }
+}</code></pre>
+</div>
+</section>
+
+<section id="vs">
+<h2>Spring Framework vs Spring Boot</h2>
+<p class="sub">Boot sits on top of Spring. You still use Spring underneath.</p>
+<div class="grid">
+<div class="card"><b>Spring Framework</b><p>The core ecosystem: Dependency Injection, Inversion of Control, web, database integration, security, transactions, testing.</p></div>
+<div class="card"><b>Spring Boot</b><p>Makes Spring easy: auto-configuration, starter dependencies, embedded servers, convention over configuration, production-ready features.</p></div>
+</div>
+<div class="note">Mental model: Spring provides the core functionality → Boot makes it easier to use → your application.</div>
+</section>
+
+<section id="starter">
+<h2>Starters: dependency bundles</h2>
+<p class="sub">Tap a starter to see what it is for.</p>
+<div class="chips" id="stChips"></div>
+<div class="card out" id="stOut"></div>
+</section>
+
+<section id="auto">
+<h2>Auto-configuration playground</h2>
+<p class="sub">Spring Boot detects what you add and configures the infrastructure. Toggle dependencies for GA_A-lock:</p>
+<div class="chips" id="acChips"></div>
+<div class="card out" id="acOut"></div>
+</section>
+
+<section id="flow">
+<h2>What happens when the app starts?</h2>
+<p class="sub">You run <code>mvn spring-boot:run</code>. Step through it.</p>
+<div class="card">
+<div class="steps" id="fSteps"></div>
+<div id="fText" style="min-height:80px"></div>
+<div class="row"><button class="btn ghost" id="fPrev">Back</button><button class="btn" id="fNext">Next step</button></div>
+</div>
+<pre><code>@SpringBootApplication   // = @SpringBootConfiguration
+public class AuthApplication {   //   + @EnableAutoConfiguration
+    public static void main(String[] args) {   //   + @ComponentScan
+        SpringApplication.run(AuthApplication.class, args);
+    }
+}</code></pre>
+<div class="note">Don't memorize the three inner annotations yet. Just remember: <code>@SpringBootApplication</code> is the main entry point and configuration annotation.</div>
+</section>
+
+<section id="arch">
+<h2>Where Spring Boot fits in GA_A-lock</h2>
+<p class="sub">Tap each layer. Later, Spring Security + JWT wrap the front of this flow.</p>
+<div class="grid" style="align-items:start">
+<div class="layers" id="layers"></div>
+<div class="card" id="layerOut"></div>
+</div>
+<div class="card" style="margin-top:12px"><b>Your app's user journey</b><p style="margin:6px 0 0">Register → Login → Receive JWT → Access protected APIs → Logout / invalidate</p></div>
+</section>
+
+<section id="gloss">
+<h2>Glossary</h2>
+<dl class="card">
+<dt>Spring Boot</dt><dd>Framework for quickly building Spring-based Java applications.</dd>
+<dt>Starter</dt><dd>A dependency bundle giving you the libraries for one feature.</dd>
+<dt>Auto-Configuration</dt><dd>Boot configures parts of the app based on your dependencies and settings.</dd>
+<dt>Embedded Server</dt><dd>A web server (commonly Tomcat) packaged inside your app.</dd>
+<dt>@SpringBootApplication</dt><dd>Main annotation on the entry-point class.</dd>
+<dt>Application Context</dt><dd>The Spring container managing beans and their relationships (more in Doc 02).</dd>
+</dl>
+<div class="note"><b>Not yet:</b> every annotation, auto-config internals, ApplicationContext internals, Maven dependency internals. Understand the idea first.</div>
+</section>
+
+<section id="quiz">
+<h2>Check your understanding</h2>
+<p class="sub">Answer in your own words first, then open the card. <span class="score" id="sc"></span></p>
+<div id="qa"></div>
+<h2 style="margin-top:28px;font-size:20px">Quick multiple choice</h2>
+<div class="card" id="mc"></div>
+<p class="sub" style="margin-top:20px">Up next: <b>02 — What is Dependency Injection?</b></p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const ST=[["spring-boot-starter-web","REST APIs / web apps. Brings Spring MVC and the embedded Tomcat."],["spring-boot-starter-data-jpa","Database access using JPA (with Hibernate). Gives you entities and repositories."],["spring-boot-starter-security","Authentication and authorization. The base for login and JWT protection."],["spring-boot-starter-validation","Request validation, e.g. checking an email or password field is valid."],["spring-boot-starter-test","Testing tools for your application."]];
+function pick(list,chipsId,fn){const c=$(chipsId);list.forEach((x,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=x[0];b.onclick=()=>{[...c.children].forEach(k=>k.classList.remove("on"));b.classList.add("on");fn(x)};c.appendChild(b)});c.children[0].click()}
+pick(ST,"stChips",x=>{$("stOut").innerHTML="<code>"+x[0]+"</code><p style='margin:8px 0 0'>"+x[1]+"</p>"});
+const AC=[["Spring Web","Embedded Tomcat starts on port 8080; JSON REST controllers work."],["Spring Data JPA","Repository and entity infrastructure is set up (needs a database)."],["PostgreSQL Driver","Boot can wire a database connection from your application config."],["Spring Security","Requests pass through a security filter chain before controllers."],["Validation","Request field validation is available on your DTOs."]];
+const on=new Set();
+const ac=$("acChips");
+AC.forEach((x,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=x[0];b.onclick=()=>{on.has(i)?on.delete(i):on.add(i);b.classList.toggle("on");renderAC()};ac.appendChild(b)});
+function renderAC(){const o=$("acOut");if(!on.size){o.innerHTML="<span style='color:var(--mute)'>Nothing added yet. Pick a dependency above.</span>";return}
+let h="<b>Spring Boot detects and configures:</b><ul style='margin:8px 0'>";[...on].sort().forEach(i=>h+="<li><b>"+AC[i][0]+"</b>: "+AC[i][1]+"</li>");h+="</ul>";
+if(on.has(1)&&on.has(2))h+="<div class='pill'>JPA + PostgreSQL → you can work with repositories/entities</div>";
+else if(on.has(1))h+="<div class='pill' style='border-color:var(--warn)'>JPA needs a database driver, add PostgreSQL</div>";
+o.innerHTML=h}renderAC();
+const FL=[["Maven starts Spring Boot","<code>mvn spring-boot:run</code> launches the app."],["SpringApplication.run()","Your main method hands control to Spring Boot."],["Application Context is created","The Spring container that will manage your beans."],["Components are discovered","Component scanning finds your controllers, services and repositories."],["Configuration is performed","Auto-configuration sets things up based on your dependencies."],["Embedded server starts","Tomcat starts inside your app, at localhost:8080."],["Ready","You see “Started AuthApplication”. The API is live."]];
+let fi=0;const fs=$("fSteps");FL.forEach((_,i)=>{const b=document.createElement("button");b.className="step";b.onclick=()=>{fi=i;rf()};fs.appendChild(b)});
+function rf(){[...fs.children].forEach((b,i)=>b.classList.toggle("done",i<=fi));$("fText").innerHTML="<b>"+(fi+1)+". "+FL[fi][0]+"</b><p style='margin:6px 0 0'>"+FL[fi][1]+"</p>"}
+$("fNext").onclick=()=>{fi=Math.min(FL.length-1,fi+1);rf()};$("fPrev").onclick=()=>{fi=Math.max(0,fi-1);rf()};rf();
+const LY=[["Client","Sends an HTTP request. Later it adds <code>Authorization: Bearer &lt;JWT&gt;</code>."],["Spring Security","Added later: authenticates and authorizes the request before it reaches your code."],["Controller","Receives the request, e.g. <code>/register</code>, and returns the response."],["Service","Holds the business logic (rules for registering, logging in)."],["Repository","Talks to the database through Spring Data JPA."],["PostgreSQL","Stores the user accounts."]];
+const ly=$("layers");LY.forEach((x,i)=>{if(i){const a=document.createElement("div");a.className="arrow";a.textContent="↓";ly.appendChild(a)}const b=document.createElement("button");b.className="layer";b.textContent=x[0];b.onclick=()=>{ly.querySelectorAll(".layer").forEach(k=>k.classList.remove("on"));b.classList.add("on");$("layerOut").innerHTML="<b>"+x[0]+"</b><p style='margin:6px 0 0'>"+x[1]+"</p>"};ly.appendChild(b)});ly.querySelector(".layer").click();
+const QA=[["What problem does Spring Boot solve?","It removes repetitive configuration so you can focus on application logic."],["How is Spring Framework different from Spring Boot?","Spring is the core ecosystem (DI, web, data, security). Boot is built on top and makes it easier with auto-config, starters, and an embedded server."],["What is a Starter?","A convenient dependency bundle, e.g. spring-boot-starter-web for building web apps."],["What does auto-configuration mean?","Boot configures parts of the app automatically from the dependencies and settings you provide."],["What is an embedded server?","A server such as Tomcat packaged inside your app, so it runs with one command and no external deployment."],["What does @SpringBootApplication do?","Marks the main configuration class and entry point; it combines configuration, auto-configuration and component scanning."],["Why Spring Boot for the auth app?","It is the foundation of the backend: REST APIs, then Security, JWT, JPA and PostgreSQL are added step by step."]];
+let seen=new Set();const qa=$("qa");
+QA.forEach((q,i)=>{const d=document.createElement("details");d.innerHTML="<summary>"+(i+1)+". "+q[0]+"</summary><p style='margin:0'>"+q[1]+"</p>";d.ontoggle=()=>{if(d.open)seen.add(i);$("sc").textContent="Revealed "+seen.size+"/"+QA.length};qa.appendChild(d)});
+const MC=[["Which starter would you add to build REST APIs?",["spring-boot-starter-web","spring-boot-starter-test","spring-boot-starter-security"],0],["What does the embedded server let you do?",["Deploy to an external server manually","Run the app with one command, server included","Skip writing controllers"],1],["Which annotation marks the app's main class?",["@RestController","@PostMapping","@SpringBootApplication"],2]];
+let mi=0,ms=0;
+function rm(){const m=$("mc");if(mi>=MC.length){m.innerHTML="<b>Done! Score: "+ms+"/"+MC.length+"</b><div class='row'><button class='btn ghost' id='rs'>Try again</button></div>";$("rs").onclick=()=>{mi=0;ms=0;rm()};return}
+const q=MC[mi];m.innerHTML="<b>"+q[0]+"</b>";q[1].forEach((t,i)=>{const b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=()=>{m.querySelectorAll(".opt").forEach((o,j)=>{o.disabled=true;if(j==q[2])o.classList.add("ok")});if(i==q[2])ms++;else b.classList.add("bad");const n=document.createElement("div");n.className="row";n.innerHTML="<button class='btn'>Next</button>";n.firstChild.onclick=()=>{mi++;rm()};m.appendChild(n)};m.appendChild(b)})}
+rm();
+</script>
+</body>
+</html>
