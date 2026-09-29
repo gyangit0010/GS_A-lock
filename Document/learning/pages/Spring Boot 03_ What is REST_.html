@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 03 — What is REST?</title>
+<style>
+:root{--bg:#f7f8f5;--card:#fff;--ink:#1c2420;--mute:#5d6b63;--line:#dfe5df;--accent:#2f8f4e;--accent2:#e8f5ec;--warn:#b45309;--bad:#b42318;--code:#101a14;--codeink:#c8f0d2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--bad:#f28b82;--code:#0a0f0c;--codeink:#c8f0d2}}
+:root[data-theme="dark"]{--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--bad:#f28b82;--code:#0a0f0c;--codeink:#c8f0d2}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;overflow-x:auto;white-space:nowrap;padding:8px 16px}
+nav a{display:inline-block;margin-right:6px;padding:4px 12px;border-radius:99px;font-size:13px;color:var(--mute);text-decoration:none;border:1px solid var(--line)}
+nav a:hover{color:var(--accent);border-color:var(--accent)}
+.hero{padding:28px 0 8px}.tag{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.15;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 6px}section{margin-top:40px}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--accent2);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+button{font:inherit;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font-size:14px;font-family:ui-monospace,Menlo,monospace}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.steps{display:flex;gap:6px;margin-bottom:12px}.step{flex:1;height:8px;border-radius:9px;background:var(--line);border:0;padding:0}.step.done{background:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:9px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--mute);font-weight:600}
+tr.hit{background:var(--accent2)}
+.tag2{display:inline-block;padding:2px 8px;border-radius:6px;font-family:ui-monospace,monospace;font-size:12px;font-weight:700}
+.g{background:#dcf5e3;color:#166534}.y{background:#fef3c7;color:#92400e}.r{background:#fde2e1;color:#991b1b}
+@media (prefers-color-scheme:dark){.g{background:#12321f;color:#7be3a0}.y{background:#332711;color:#f0c26a}.r{background:#3a1616;color:#f0a19c}}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:6px;color:var(--accent)}
+dl{margin:0}dt{font-weight:700;margin-top:12px;color:var(--accent)}dd{margin:2px 0 0}
+.note{border-left:4px solid var(--warn);padding:8px 14px;background:var(--card);border-radius:0 10px 10px 0;margin-top:12px;font-size:15px}
+.score{font-weight:700;color:var(--accent)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.opt.ok{border-color:var(--accent);background:var(--accent2)}.opt.no{border-color:var(--warn)}
+.url span{padding:3px 6px;border-radius:6px;margin:0 2px;display:inline-block;font-family:ui-monospace,monospace}
+.big{font-size:18px;font-weight:600;line-height:1.5}
+</style>
+</head>
+<body>
+<nav><a href="#api">API</a><a href="#methods">HTTP methods</a><a href="#url">URL anatomy</a><a href="#eps">Auth endpoints</a><a href="#status">Status codes</a><a href="#stateless">Stateless</a><a href="#gloss">Glossary</a><a href="#quiz">Quiz</a></nav>
+<main>
+<div class="hero"><div class="tag">Doc 03 · GA_A-lock</div><h1>What is REST?</h1>
+<p class="sub">How the React frontend and Spring Boot backend of GA_A-lock will actually talk to each other.</p></div>
+
+<section id="api">
+<h2>1. API → REST API</h2>
+<div class="grid">
+<div class="card"><b>API</b><p style="margin:6px 0 0">A way for one piece of software to talk to another. Like a waiter between customer and kitchen: the frontend never touches the database directly, it goes through the backend API.</p></div>
+<div class="card"><b>REST</b><p style="margin:6px 0 0">Representational State Transfer — an <em>architectural style</em> for designing APIs that communicate over HTTP. Not a language, not a Spring feature.</p></div>
+</div>
+<div class="card" style="margin-top:12px"><pre><code>Frontend  →  HTTP Request  →  Spring Boot Backend  →  PostgreSQL</code></pre>
+<p style="margin:0"><code>POST /api/auth/register</code> is the frontend telling the backend: "Create a new user."</p></div>
+</section>
+
+<section id="methods">
+<h2>2. HTTP methods</h2>
+<p class="sub">Tap a method to see it used for GA_A-lock.</p>
+<div class="chips" id="mChips"></div>
+<div class="card"><div id="mOut"></div></div>
+</section>
+
+<section id="url">
+<h2>3. Anatomy of a URL</h2>
+<p class="sub">Tap each piece of <code class="url"><span id="u1">GET</span> <span id="u2">/api</span><span id="u3">/users</span><span id="u4">/42</span></code>.</p>
+<div class="chips" id="uChips"></div>
+<div class="card" id="uOut"></div>
+</section>
+
+<section id="eps">
+<h2>4. GA_A-lock's endpoints, step by step</h2>
+<p class="sub">Follow register, login and "who am I" through request and response.</p>
+<div class="chips" id="epChips"></div>
+<div class="card">
+<div class="steps" id="epSteps"></div>
+<div id="epText" style="min-height:170px"></div>
+<div class="row"><button class="btn ghost" id="epPrev">Back</button><button class="btn" id="epNext">Next</button></div>
+</div>
+</section>
+
+<section id="status">
+<h2>5. HTTP status codes</h2>
+<p class="sub">Type or pick a scenario, get the code Spring Boot would return.</p>
+<div class="chips" id="sChips"></div>
+<div class="card" id="sOut"></div>
+<div class="card" style="margin-top:12px"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody id="sTable"></tbody></table></div>
+</section>
+
+<section id="stateless">
+<h2>6. REST is stateless</h2>
+<p class="sub">Each request must carry everything the server needs — the server keeps no memory of the last request.</p>
+<div class="card">
+<div class="row"><button class="btn" id="reqBtn">Send another request</button></div>
+<div id="statelessOut" style="margin-top:12px"></div>
+</div>
+<div class="note">This is exactly why a JWT is attached to <em>every</em> request via <code>Authorization: Bearer &lt;JWT&gt;</code>, rather than the server remembering you logged in earlier.</div>
+</section>
+
+<section id="gloss">
+<h2>Glossary</h2>
+<dl class="card">
+<dt>API</dt><dd>A way for software to communicate with other software.</dd>
+<dt>REST</dt><dd>An architectural style for designing APIs over HTTP, built around resources.</dd>
+<dt>Resource</dt><dd>Something the API works with, e.g. a user, represented by a URL.</dd>
+<dt>JSON</dt><dd>JavaScript Object Notation — the structured format APIs commonly exchange.</dd>
+<dt>Stateless</dt><dd>Each request carries what the server needs; no session memory between requests.</dd>
+<dt>Status code</dt><dd>A number in the response telling the client what happened (200, 401, 404...).</dd>
+</dl>
+</section>
+
+<section id="quiz">
+<h2>Check your understanding</h2>
+<p class="sub">Answer in your own words first, then open the card. <span class="score" id="sc"></span></p>
+<div id="qa"></div>
+<h2 style="margin-top:28px;font-size:20px">Quick multiple choice</h2>
+<div class="card" id="mc"></div>
+<p class="sub" style="margin-top:20px">Up next: <b>04 — What is a Controller?</b></p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const M=[["GET","Retrieve data","GET /api/users/me","Give me the currently authenticated user.","{ \"id\":1, \"name\":\"Gyan\", \"email\":\"gyan@example.com\" }"],
+["POST","Create / perform an operation","POST /api/auth/register","{ \"name\":\"Gyan\",\"email\":\"gyan@example.com\",\"password\":\"secret\" }","{ \"message\":\"Registration successful\" }"],
+["PUT","Replace an existing resource","PUT /api/users/1","{ \"name\":\"Gyan Sharma\",\"email\":\"gyan@example.com\" }","Full resource replaced."],
+["PATCH","Partially update a resource","PATCH /api/users/1","{ \"name\":\"Gyan Sharma\" }","Only the name changes."],
+["DELETE","Remove a resource","DELETE /api/users/1","(no body)","User 1 deleted."]];
+const mc=$("mChips");M.forEach((x,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=x[0];b.onclick=()=>{[...mc.children].forEach(k=>k.classList.remove("on"));b.classList.add("on");$("mOut").innerHTML="<b>"+x[0]+"</b> — "+x[1]+"<pre><code>"+x[2]+"</code></pre><p style='margin:4px 0'>Request:</p><pre><code>"+x[3]+"</code></pre><p style='margin:4px 0'>Response:</p><pre><code>"+x[4]+"</code></pre>"};mc.appendChild(b)});mc.children[0].click();
+
+const U=[["GET","HTTP method — what to do"],["/api","API prefix"],["/users","Resource — what we're working with"],["/42","Resource ID — which one"]];
+const uc=$("uChips");["u1","u2","u3","u4"].forEach((id,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=U[i][0];b.onclick=()=>{["u1","u2","u3","u4"].forEach(x=>$(x).style.background="");$(id).style.background="var(--accent2)";$("uOut").innerHTML="<b>"+U[i][0]+"</b><p style='margin:6px 0 0'>"+U[i][1]+"</p>"};uc.appendChild(b)});uc.children[0].click();
+
+const EP=[["Register",[["1. Frontend sends","<pre><code>POST /api/auth/register\n{\n  \"name\": \"Gyan\",\n  \"email\": \"gyan@example.com\",\n  \"password\": \"secret\"\n}</code></pre>"],["2. Backend processes","Spring Boot validates the input and creates a new user record."],["3. Backend responds","<pre><code>201 Created\n{ \"message\": \"Registration successful\" }</code></pre>"]]],
+["Login",[["1. Frontend sends","<pre><code>POST /api/auth/login\n{\n  \"email\": \"gyan@example.com\",\n  \"password\": \"secret\"\n}</code></pre>"],["2. Backend verifies","Spring Boot checks the credentials against PostgreSQL."],["3. Backend responds","<pre><code>200 OK\n{ \"token\": \"eyJhbGciOiJIUzI1NiJ9...\" }</code></pre>That token is the JWT."]]],
+["Who am I",[["1. Frontend sends","<pre><code>GET /api/users/me\nAuthorization: Bearer &lt;JWT&gt;</code></pre>"],["2. Backend verifies","Spring Security will eventually verify the token (covered later)."],["3. Backend responds","<pre><code>200 OK\n{ \"id\":1, \"name\":\"Gyan\", \"email\":\"gyan@example.com\" }</code></pre>"]]]];
+let epi=0,epsi=0;const epc=$("epChips");
+EP.forEach((x,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=x[0];b.onclick=()=>{epi=i;epsi=0;[...epc.children].forEach(k=>k.classList.remove("on"));b.classList.add("on");rep()};epc.appendChild(b)});
+function rep(){const steps=EP[epi][1];const ss=$("epSteps");ss.innerHTML="";steps.forEach((_,i)=>{const b=document.createElement("button");b.className="step"+(i<=epsi?" done":"");b.onclick=()=>{epsi=i;rep()};ss.appendChild(b)});$("epText").innerHTML="<b>"+steps[epsi][0]+"</b><div style='margin-top:6px'>"+steps[epsi][1]+"</div>"}
+$("epNext").onclick=()=>{epsi=Math.min(EP[epi][1].length-1,epsi+1);rep()};$("epPrev").onclick=()=>{epsi=Math.max(0,epsi-1);rep()};epc.children[0].click();
+
+const SCODES=[[200,"OK","g"],[201,"Created","g"],[204,"No Content","g"],[400,"Bad Request","y"],[401,"Unauthorized","y"],[403,"Forbidden","y"],[404,"Not Found","y"],[409,"Conflict","y"],[500,"Internal Server Error","r"]];
+const st=$("sTable");SCODES.forEach(x=>{const tr=document.createElement("tr");tr.id="row"+x[0];tr.innerHTML="<td><span class='tag2 "+x[2]+"'>"+x[0]+"</span></td><td>"+x[1]+"</td>";st.appendChild(tr)});
+const SC=[["Registration succeeds",201,"New user created."],["Wrong email or password",401,"Client isn't authenticated / credentials are invalid."],["Valid token but not allowed to access this resource",403,"Authenticated, but forbidden — different from 401."],["Requested user doesn't exist",404,"No resource at that URL."],["Email already registered",409,"Conflict with existing data."],["Successful fetch of current user",200,"Standard successful GET."],["Unexpected server crash",500,"Something failed on the server side."]];
+const sc=$("sChips");SC.forEach((x,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=x[0];b.onclick=()=>{[...sc.children].forEach(k=>k.classList.remove("on"));b.classList.add("on");document.querySelectorAll("#sTable tr").forEach(r=>r.classList.remove("hit"));$("row"+x[1]).classList.add("hit");$("sOut").innerHTML="<b>"+x[0]+"</b> → <span class='tag2 "+(SCODES.find(c=>c[0]==x[1])[2])+"'>"+x[1]+"</span><p style='margin:6px 0 0'>"+x[2]+"</p>"};sc.appendChild(b)});sc.children[0].click();
+
+let reqN=0;
+$("reqBtn").onclick=()=>{reqN++;$("statelessOut").innerHTML="<pre><code>Request "+reqN+"\nGET /api/users/me\nAuthorization: Bearer &lt;JWT&gt;\n\n→ Server verifies the JWT fresh (remembers nothing from request "+(reqN>1?reqN-1:"—")+")\n→ 200 OK</code></pre>"};
+$("reqBtn").click();
+
+const QA=[["What does REST stand for?","Representational State Transfer."],["What is an API?","A way for one piece of software to communicate with another."],["What is a REST API?","An API designed following REST principles: resource-oriented URLs, standard HTTP methods, stateless requests."],["What is an HTTP request?","What the client sends to the server: a method, a URL, and often a body."],["What is an HTTP response?","What the server sends back: a status code and usually a body."],["What are GET, POST, PUT, PATCH, DELETE for?","Retrieve, create/submit, replace, partially update, and remove, respectively."],["What is a REST resource?","Something the API works with, e.g. a user, represented by a URL like /api/users/42."],["Why JSON?","A structured, language-independent format that both React and Spring Boot can convert to/from easily."],["What does 'stateless' mean?","Each request carries all the information the server needs; the server doesn't rely on remembering earlier requests."],["What would POST /api/auth/login do?","Authenticate the user and return a JWT."],["401 vs 403 at a high level?","401: not authenticated (missing/invalid credentials). 403: authenticated, but not allowed to do this."],["How does REST fit into GA_A-lock?","The React frontend and Spring Boot backend exchange JSON over HTTP, through resource-oriented endpoints like /api/auth/register and /api/auth/login."]];
+const seen=new Set();
+QA.forEach((q,i)=>{const d=document.createElement("details");d.innerHTML="<summary>"+(i+1)+". "+q[0]+"</summary><p style='margin:0'>"+q[1]+"</p>";d.ontoggle=()=>{if(d.open)seen.add(i);$("sc").textContent="Revealed "+seen.size+"/"+QA.length};$("qa").appendChild(d)});
+const MC=[["Which method fits creating a new user?",["GET","POST","DELETE"],1],["What does statelessness mean for our JWT setup?",["The server remembers who logged in","Every request carries the JWT itself","Login only needs to happen once per day"],1],["A wrong password on login should return...",["200","401","500"],1]];
+let mi=0,ms=0;
+function rm(){const m=$("mc");if(mi>=MC.length){m.innerHTML="<b>Done! Score: "+ms+"/"+MC.length+"</b><div class='row'><button class='btn ghost' id='rs'>Try again</button></div>";$("rs").onclick=()=>{mi=0;ms=0;rm()};return}
+const q=MC[mi];m.innerHTML="<b>"+q[0]+"</b>";q[1].forEach((t,i)=>{const b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=()=>{m.querySelectorAll(".opt").forEach((o,j)=>{o.disabled=true;if(j==q[2])o.classList.add("ok")});if(i==q[2])ms++;else b.classList.add("no");const n=document.createElement("div");n.className="row";n.innerHTML="<button class='btn'>Next</button>";n.firstChild.onclick=()=>{mi++;rm()};m.appendChild(n)};m.appendChild(b)})}
+rm();
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 02 — Dependency Injection</title>
+<style>
+:root{--bg:#f7f8f5;--card:#fff;--ink:#1c2420;--mute:#5d6b63;--line:#dfe5df;--accent:#2f8f4e;--accent2:#e8f5ec;--warn:#b45309;--bad:#b42318;--code:#101a14;--codeink:#c8f0d2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--bad:#f28b82;--code:#0a0f0c;--codeink:#c8f0d2}}
+:root[data-theme="dark"]{--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--bad:#f28b82;--code:#0a0f0c;--codeink:#c8f0d2}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;overflow-x:auto;white-space:nowrap;padding:8px 16px}
+nav a{display:inline-block;margin-right:6px;padding:4px 12px;border-radius:99px;font-size:13px;color:var(--mute);text-decoration:none;border:1px solid var(--line)}
+nav a:hover{color:var(--accent);border-color:var(--accent)}
+.hero{padding:28px 0 8px}.tag{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.15;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 6px}section{margin-top:40px}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--accent2);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}.hl{background:rgba(95,208,135,.22);border-radius:3px}
+.bad{color:var(--bad)}.good{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font-size:14px}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pill{display:inline-block;background:var(--accent2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:3px 4px 3px 0;font-size:13px}
+.pill.bean{border-color:var(--accent);font-weight:600}
+.steps{display:flex;gap:6px;margin-bottom:12px}.step{flex:1;height:8px;border-radius:9px;background:var(--line);border:0;padding:0}.step.done{background:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:9px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.wire{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.node{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--card);font-weight:600;font-size:14px}
+.node.made{border-color:var(--accent);background:var(--accent2)}
+.node.off{opacity:.45;border-style:dashed}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:6px;color:var(--accent)}
+dl{margin:0}dt{font-weight:700;margin-top:12px;color:var(--accent)}dd{margin:2px 0 0}
+.note{border-left:4px solid var(--warn);padding:8px 14px;background:var(--card);border-radius:0 10px 10px 0;margin-top:12px;font-size:15px}
+.score{font-weight:700;color:var(--accent)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.opt.ok{border-color:var(--accent);background:var(--accent2)}.opt.no{border-color:var(--warn)}
+.big{font-size:18px;font-weight:600;line-height:1.5}
+</style>
+</head>
+<body>
+<nav><a href="#dep">Dependency</a><a href="#di">With vs without</a><a href="#bean">Container &amp; beans</a><a href="#ctor">Constructor injection</a><a href="#ioc">IoC vs DI</a><a href="#types">3 types</a><a href="#gloss">Glossary</a><a href="#quiz">Quiz</a></nav>
+<main>
+<div class="hero"><div class="tag">Doc 02 · GA_A-lock</div><h1>What is Dependency Injection?</h1>
+<p class="sub">The concept that makes Spring code stop looking like magic.</p></div>
+
+<section id="dep">
+<h2>1. What is a dependency?</h2>
+<p class="sub">An object a class needs in order to do its job.</p>
+<div class="grid">
+<div class="card"><pre><code>public class AuthService {
+    private UserRepository userRepository;
+}</code></pre><p style="margin:0"><code>AuthService</code> needs <code>UserRepository</code> to reach the database. So <code>UserRepository</code> is a <b>dependency</b> of <code>AuthService</code>.</p></div>
+<div class="card"><b>Restaurant analogy</b><p>A chef needs ingredients. They shouldn't find a farmer, buy seeds, grow vegetables and build a farm first.</p><p style="margin:0">A class shouldn't be responsible for creating everything it needs either.</p></div>
+</div>
+</section>
+
+<section id="di">
+<h2>2. Without DI vs with DI</h2>
+<p class="sub">Toggle, and pick how many dependencies AuthService has.</p>
+<div class="chips" id="modeChips"></div>
+<div class="chips" id="depChips"></div>
+<div class="card"><pre id="diCode"></pre><div id="diNote"></div></div>
+<div class="card big" style="margin-top:12px">Dependency Injection means providing an object with the dependencies it needs instead of making the object create them itself.</div>
+</section>
+
+<section id="bean">
+<h2>3. The Spring container and beans</h2>
+<p class="sub">Spring's IoC container creates, manages, connects, and controls the lifecycle of objects. Managed objects are <b>beans</b>. Add annotations to see Spring pick them up:</p>
+<div class="chips" id="beanChips"></div>
+<div class="card"><div class="wire" id="beanWire"></div><div id="beanNote" style="margin-top:10px"></div></div>
+<div class="note">Spring Boot scans for <code>@Component</code>, <code>@Service</code>, <code>@Repository</code>, <code>@Controller</code>, <code>@RestController</code> and registers those classes as beans.</div>
+</section>
+
+<section id="ctor">
+<h2>4. Constructor injection, step by step</h2>
+<p class="sub">What Spring does at startup. This is the style we'll use in GA_A-lock.</p>
+<pre><code>@Repository
+public class UserRepository { }
+
+@Service
+public class AuthService {
+    private final UserRepository userRepository;
+
+    public AuthService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+}</code></pre>
+<div class="card"><div class="steps" id="cs"></div><div id="ct" style="min-height:90px"></div>
+<div class="row"><button class="btn ghost" id="cp">Back</button><button class="btn" id="cn">Next step</button></div></div>
+<div class="grid" style="margin-top:12px">
+<div class="card"><b>Why <code>private final</code>?</b><p style="margin:6px 0 0">The dependency is assigned once through the constructor and can't be replaced later, which makes the relationship clearer and safer.</p></div>
+<div class="card"><b>Is <code>@Autowired</code> needed?</b><p style="margin:6px 0 0">Not with a single constructor. Modern Spring uses it automatically. <code>@Autowired</code> means "find a suitable bean and inject it here."</p></div>
+</div>
+</section>
+
+<section id="ioc">
+<h2>5. IoC vs DI</h2>
+<div class="grid">
+<div class="card"><b>Normally</b><p style="margin:6px 0 0">Your class → creates objects → uses objects.</p></div>
+<div class="card"><b>With Spring</b><p style="margin:6px 0 0">Spring → creates objects → provides them to your classes. Control moved from your code to the container: <b>Inversion of Control</b>.</p></div>
+</div>
+<div class="card" style="margin-top:12px"><p style="margin:0"><b>IoC</b> is the broader principle: the framework controls object creation and management.<br><b>DI</b> is one technique to achieve it: dependencies come from outside instead of being created inside.</p></div>
+<div class="note">IoC is the principle; DI is a common technique used to achieve it.</div>
+</section>
+
+<section id="types">
+<h2>6. Three types of injection</h2>
+<p class="sub">Tap a type.</p>
+<div class="chips" id="tyChips"></div>
+<div class="card"><pre id="tyCode"></pre><div id="tyNote"></div></div>
+</section>
+
+<section id="gloss">
+<h2>Glossary</h2>
+<dl class="card">
+<dt>Dependency</dt><dd>An object a class needs to do its job.</dd>
+<dt>Dependency Injection</dt><dd>A class receives its dependencies from outside instead of creating them.</dd>
+<dt>Spring IoC Container</dt><dd>Creates, manages, connects and controls the lifecycle of objects.</dd>
+<dt>Bean</dt><dd>An object managed by the Spring container.</dd>
+<dt>IoC</dt><dd>Control over object creation moves from your code to the framework.</dd>
+<dt>Constructor injection</dt><dd>Dependencies are passed through the constructor. Our preferred style.</dd>
+<dt>@Autowired</dt><dd>Tells Spring to find a suitable bean and inject it.</dd>
+</dl>
+<div class="card" style="margin-top:12px"><b>The key chain</b><p style="margin:6px 0 0">Dependency → Dependency Injection → Spring Container → Spring Beans → Your Application</p></div>
+</section>
+
+<section id="quiz">
+<h2>Check your understanding</h2>
+<p class="sub">Answer in your own words first, then open the card. <span class="score" id="sc"></span></p>
+<div id="qa"></div>
+<h2 style="margin-top:28px;font-size:20px">Quick multiple choice</h2>
+<div class="card" id="mc"></div>
+<p class="sub" style="margin-top:20px">Up next: <b>03 — What is REST?</b></p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function chips(id,labels,fn,multi){const c=$(id);labels.forEach((l,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=l;b.onclick=()=>{[...c.children].forEach(k=>k.classList.remove("on"));b.classList.add("on");fn(i)};c.appendChild(b)});c.children[0].click()}
+const DEPS=["UserRepository","PasswordEncoder","JwtService","EmailService"];
+let mode=0,cnt=1;
+function rd(){const d=DEPS.slice(0,cnt);let h;
+if(mode==0){h="<span class='bad'>// ❌ Without DI</span>\npublic class AuthService {\n"+d.map(x=>"    private "+x+" "+x[0].toLowerCase()+x.slice(1)+";").join("\n")+"\n\n    public AuthService() {\n"+d.map(x=>"        "+x[0].toLowerCase()+x.slice(1)+" = <span class='bad'>new "+x+"()</span>;").join("\n")+"\n    }\n}";
+$("diNote").innerHTML="<p style='margin:8px 0 0'>The service creates and manages all "+cnt+" of its dependencies. It is tightly coupled to how they're built, and it gets harder to maintain and test as the app grows.</p>"}
+else{h="<span class='good'>// ✅ With DI</span>\n@Service\npublic class AuthService {\n"+d.map(x=>"    private final "+x+" "+x[0].toLowerCase()+x.slice(1)+";").join("\n")+"\n\n    public AuthService("+d.map(x=>x+" "+x[0].toLowerCase()+x.slice(1)).join(", ")+") {\n"+d.map(x=>"        this."+x[0].toLowerCase()+x.slice(1)+" = "+x[0].toLowerCase()+x.slice(1)+";").join("\n")+"\n    }\n}";
+$("diNote").innerHTML="<p style='margin:8px 0 0'>The class only says <b>what it needs</b>. Spring handles <b>how</b> it's provided. Benefits: loose coupling, easier testing with mocks, easier maintenance, centralized object management.</p>"}
+$("diCode").innerHTML="<code>"+h+"</code>"}
+chips("modeChips",["Without DI","With DI"],i=>{mode=i;rd()});
+chips("depChips",["1 dependency","2","3","4"],i=>{cnt=i+1;rd()});
+const BN=[["UserRepository","@Repository"],["JwtService","@Service"],["PasswordEncoder","@Component"],["AuthService","@Service"]];
+const bon=new Set();const bc=$("beanChips");
+BN.forEach((x,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=x[1]+" on "+x[0];b.onclick=()=>{bon.has(i)?bon.delete(i):bon.add(i);b.classList.toggle("on");rb()};bc.appendChild(b)});
+function rb(){const w=$("beanWire");w.innerHTML="";BN.forEach((x,i)=>{const n=document.createElement("div");n.className="node "+(bon.has(i)?"made":"off");n.textContent=x[0]+(bon.has(i)?"  → bean ✔":"  (plain class)");w.appendChild(n)});
+const a=bon.has(3),deps=[0,1,2].filter(i=>bon.has(i)).map(i=>BN[i][0]);
+$("beanNote").innerHTML=!bon.size?"<span style='color:var(--mute)'>No annotations yet, so Spring manages nothing.</span>":a?"Spring creates "+(deps.length?deps.join(", ")+" first, then ":"")+"<b>AuthService</b> and passes what it asks for through the constructor."+(deps.length<3?" <span style='color:var(--warn)'>Any missing dependency isn't a bean, so Spring has nothing to inject there.</span>":""):"Spring creates and manages: "+[...bon].map(i=>BN[i][0]).join(", ")+"."}
+rb();
+const CS=[["Application starts","Spring Boot scans for annotated classes."],["Finds UserRepository","<code>@Repository</code> → Spring creates a <code>UserRepository</code> object (a bean)."],["Finds AuthService","<code>@Service</code> → Spring sees its constructor requires a <code>UserRepository</code>."],["Spring provides the bean","It passes the existing <code>UserRepository</code> bean into the constructor."],["Result","Roughly what Spring did for you: <pre><code>UserRepository repository = new UserRepository();\nAuthService service = new AuthService(repository);</code></pre>You never write this yourself."]];
+let ci=0;const cs=$("cs");CS.forEach((_,i)=>{const b=document.createElement("button");b.className="step";b.onclick=()=>{ci=i;rc()};cs.appendChild(b)});
+function rc(){[...cs.children].forEach((b,i)=>b.classList.toggle("done",i<=ci));$("ct").innerHTML="<b>"+(ci+1)+". "+CS[ci][0]+"</b><p style='margin:6px 0 0'>"+CS[ci][1]+"</p>"}
+$("cn").onclick=()=>{ci=Math.min(CS.length-1,ci+1);rc()};$("cp").onclick=()=>{ci=Math.max(0,ci-1);rc()};rc();
+const TY=[["Constructor ⭐","public AuthService(UserRepository repository) {\n    this.repository = repository;\n}","We'll primarily use this in GA_A-lock. Works with <code>final</code> fields."],["Setter","@Autowired\npublic void setUserRepository(UserRepository repository) {\n    this.userRepository = repository;\n}","The dependency is provided through a setter method."],["Field","@Autowired\nprivate UserRepository userRepository;","Common in tutorials and older projects, but we'll generally prefer constructor injection."]];
+chips("tyChips",TY.map(x=>x[0]),i=>{$("tyCode").innerHTML="<code>"+TY[i][1]+"</code>";$("tyNote").innerHTML="<p style='margin:8px 0 0'>"+TY[i][2]+"</p>"});
+const QA=[["What is a dependency?","An object/class that another class needs in order to do its job."],["What is Dependency Injection?","Providing an object with the dependencies it needs, instead of making the object create them itself."],["Why shouldn't classes always create their own dependencies?","It tightly couples classes, makes them hard to maintain and test, and makes the class responsible for building everything it uses."],["What is the Spring IoC Container?","Spring's container that creates, manages, connects and controls the lifecycle of application objects."],["What is a Spring Bean?","An object managed by the Spring container, e.g. a class annotated with @Service."],["What is IoC?","Inversion of Control: control over object creation moves from your code to the framework."],["IoC vs DI?","IoC is the principle; DI is a common technique to achieve it."],["What is constructor injection?","The dependency is requested as a constructor parameter and Spring supplies the matching bean."],["Why prefer constructor injection?","Dependencies are explicit and can be private final, so they're assigned once and can't be swapped later."],["What could AuthService depend on?","UserRepository, PasswordEncoder, JwtService (and maybe an EmailService)."]];
+const seen=new Set();
+QA.forEach((q,i)=>{const d=document.createElement("details");d.innerHTML="<summary>"+(i+1)+". "+q[0]+"</summary><p style='margin:0'>"+q[1]+"</p>";d.ontoggle=()=>{if(d.open)seen.add(i);$("sc").textContent="Revealed "+seen.size+"/"+QA.length};$("qa").appendChild(d)});
+const MC=[["Who creates and provides the objects with DI?",["The class itself","The Spring container","The database"],1],["Which line is the DI-friendly way to get a UserRepository?",["repository = new UserRepository();","A constructor parameter: AuthService(UserRepository repository)","A static global variable"],1],["IoC and DI are related as...",["IoC is the principle, DI is a technique for it","They are exactly the same","DI is broader than IoC"],0]];
+let mi=0,ms=0;
+function rm(){const m=$("mc");if(mi>=MC.length){m.innerHTML="<b>Done! Score: "+ms+"/"+MC.length+"</b><div class='row'><button class='btn ghost' id='rs'>Try again</button></div>";$("rs").onclick=()=>{mi=0;ms=0;rm()};return}
+const q=MC[mi];m.innerHTML="<b>"+q[0]+"</b>";q[1].forEach((t,i)=>{const b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=()=>{m.querySelectorAll(".opt").forEach((o,j)=>{o.disabled=true;if(j==q[2])o.classList.add("ok")});if(i==q[2])ms++;else b.classList.add("no");const n=document.createElement("div");n.className="row";n.innerHTML="<button class='btn'>Next</button>";n.firstChild.onclick=()=>{mi++;rm()};m.appendChild(n)};m.appendChild(b)})}
+rm();
+</script>
+</body>
+</html>
