@@ -1,0 +1,161 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Spring Boot — Phase 1: Foundations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#0d1117;--card:#161b22;--bd:#30363d;--tx:#e6edf3;--mu:#8b949e;--ac:#7c83ff;--ok:#3fb950;--wa:#d29922;--code:#0a0e14;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0d1117}}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.65 -apple-system,"Segoe UI",Inter,sans-serif}
+code,pre,.mono{font-family:"JetBrains Mono",Consolas,Menlo,monospace}
+#app{display:grid;grid-template-columns:270px minmax(0,1fr) 190px;min-height:100vh}
+aside{border-right:1px solid var(--bd);padding:18px 12px;position:sticky;top:0;height:100vh;overflow:auto;background:#0b0f14}
+aside h4{margin:0 8px 12px;font-size:12px;letter-spacing:.12em;color:var(--mu)}
+.nv{display:flex;gap:8px;padding:6px 10px;border-radius:6px;color:var(--mu);cursor:pointer;font-size:13.5px}
+.nv:hover{background:var(--card);color:var(--tx)}.nv.on{background:#7c83ff22;color:var(--tx)}.nv i{font-style:normal;width:14px}
+.nv.done i{color:var(--ok)}.nv.cur i{color:var(--ac)}
+main{padding:28px 38px 80px;max-width:880px;width:100%}
+.toc{position:sticky;top:0;height:100vh;padding:28px 10px;font-size:12.5px}.toc b{color:var(--mu);letter-spacing:.1em;font-size:11px}
+.toc a{display:block;color:var(--mu);padding:3px 0;text-decoration:none}.toc a:hover{color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px 20px;margin:12px 0;animation:f .3s}
+@keyframes f{from{opacity:0;transform:translateY(5px)}}
+h1{font-size:30px;margin:6px 0}h2{font-size:18px;margin:34px 0 4px;color:var(--ac)}.crumb{color:var(--mu);font-size:12.5px}
+.bar{height:10px;background:var(--bd);border-radius:9px;overflow:hidden}.bar div{height:100%;background:linear-gradient(90deg,var(--ac),var(--ok));transition:width .5s}
+button,.btn{background:var(--ac);color:#fff;border:0;border-radius:7px;padding:8px 16px;font:600 14px inherit;cursor:pointer}
+button.g{background:var(--card);border:1px solid var(--bd);color:var(--tx)}button:hover{filter:brightness(1.15)}
+pre{background:var(--code);border:1px solid var(--bd);border-radius:8px;padding:14px;overflow-x:auto;margin:0;font-size:13px;line-height:1.55}
+.ch{display:flex;justify-content:space-between;background:#1c2128;border:1px solid var(--bd);border-bottom:0;border-radius:8px 8px 0 0;padding:4px 12px;font-size:12px;color:var(--mu)}.ch button{padding:1px 9px;font-size:12px}
+.k{color:#ff7b72}.s{color:#a5d6ff}.c{color:#6e7681}.a{color:#d2a8ff}.t{color:#7ee787}
+.fl{display:flex;flex-direction:column;align-items:center;gap:0}
+.nd{border:1px solid var(--bd);background:var(--card);padding:7px 22px;border-radius:8px;cursor:pointer;min-width:200px;text-align:center;font-weight:600}
+.nd:hover,.nd.on{border-color:var(--ac);background:#7c83ff22}.ar{color:var(--mu);line-height:1.2}
+.info{border-left:3px solid var(--ac);padding:8px 14px;margin-top:10px;background:#7c83ff12;border-radius:0 8px 8px 0;min-height:60px}
+.opt{display:block;width:100%;text-align:left;margin:5px 0;background:#0d1117;border:1px solid var(--bd);color:var(--tx);font-weight:400}
+.opt.ok{border-color:var(--ok);background:#3fb95022}.opt.no{border-color:#f85149;background:#f8514922}
+textarea,input{width:100%;background:#0d1117;color:var(--tx);border:1px solid var(--bd);border-radius:7px;padding:9px;font:inherit}
+.tabs button{margin:0 6px 8px 0}.tabs .on{background:var(--ac)}.tabs button:not(.on){background:var(--card);border:1px solid var(--bd)}
+.hid{display:none}.tag{font-size:12px;color:var(--wa)}#mb{display:none}
+@media(max-width:1100px){#app{grid-template-columns:260px 1fr}.toc{display:none}}
+@media(max-width:760px){#app{display:block}aside{position:fixed;z-index:9;width:280px;transform:translateX(-100%);transition:.2s;top:0;left:0}aside.open{transform:none}main{padding:18px 16px 80px}#mb{display:inline-block;margin-bottom:10px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><div id="app"><aside id="sb"></aside><main id="m"></main><div class="toc" id="toc"></div></div>
+<script>
+const L=[["What is Spring Boot?","Spring Boot is a tool that sets up and runs a Spring application for you, with sensible defaults.","The app boots, auto-configures, and exposes /auth endpoints."],
+["Why Spring Boot?","It removes boilerplate setup so you can write business code from minute one.","Starter dependencies give web, JPA and security in a few lines."],
+["Spring vs Spring Boot","Spring is the toolbox; Spring Boot is the toolbox already organised for the job.","We use Boot so Spring Security is wired with minimal config."],
+["What problem does it solve?","Spring needed lots of XML/config. Boot auto-configures from what is on your classpath.","Add the PostgreSQL driver and Boot prepares a DataSource."],
+["How a Boot app works","main() starts Spring, which scans classes, creates beans and starts an embedded server.","Our auth API is just a Boot app listening on port 8080."],
+["Project structure","Code is grouped by role: controller, service, repository, entity, dto, config.","We'll create AuthController, AuthService, UserRepository, User."],
+["Dependency Injection","Spring creates objects and hands them to the classes that need them.","AuthController receives AuthService; AuthService receives UserRepository and PasswordEncoder."],
+["Inversion of Control","You stop controlling object creation; the framework does it.","Spring builds our whole auth object graph at startup."],
+["Beans","A bean is an object managed by Spring.","PasswordEncoder will be a bean we define and inject."],
+["Application Context","The container that holds all beans and wires them.","It stores our JWT service and security filter."],
+["Controllers","Controllers receive HTTP requests and return responses.","AuthController: POST /auth/register and /auth/login."],
+["Services","A Service contains the application's business logic.","AuthService checks passwords and generates JWTs."],
+["Repositories","A Repository talks to the database.","UserRepository.findByEmail() loads users from PostgreSQL."],
+["REST APIs","Resources are exposed as URLs and manipulated through HTTP methods.","/auth/register and /auth/login are our REST endpoints."],
+["HTTP methods","GET reads, POST creates, PUT/PATCH updates, DELETE removes.","Register and login are POST."],
+["Request and Response","A request carries data in; a response carries status + body out.","Login request: email+password. Response: 200 + JWT."],
+["DTOs","A DTO is a simple object shaped for what crosses the API boundary.","LoginRequest and AuthResponse keep the password hash out of responses."],
+["JPA and Hibernate","JPA is the standard; Hibernate maps Java objects to tables.","Hibernate turns User objects into rows."],
+["Entities","An entity is a Java class mapped to a database table.","User entity: id, email, passwordHash, role."],
+["PostgreSQL","A reliable relational database that stores our tables.","The users table lives here."],
+["Database connection","application.properties tells Boot the URL, user and password.","We'll point Boot at our auth_db."],
+["Authentication vs Authorization","Authentication = who are you? Authorization = what may you do?","Login = authentication. ROLE_ADMIN endpoints = authorization."],
+["Password hashing","Passwords are stored as one-way hashes, never plain text.","BCrypt hashes on register and verifies on login."],
+["JWT authentication","A signed token proving who you are, sent on every request.","Login returns a JWT; a filter validates it."],
+["How it all connects","Request → Filter → Controller → Service → Repository → DB → Response.","Phase 2 builds this exact chain."]];
+const F={0:{s:"Spring Boot lets you start a Java backend with almost no setup. You write the code that matters; it handles the plumbing.",tm:"Imagine opening a new restaurant. Spring Boot is like renting a kitchen that already has gas, water and staff. You just cook.",an:"Spring Boot is a ready-furnished flat. Plain Spring is an empty plot where you build everything.",te:"Spring Boot is an opinionated layer on Spring Framework providing starter dependencies, auto-configuration and an embedded server (Tomcat), producing a runnable JAR.",w:"Without it you'd configure servers, dependencies and wiring by hand before writing a single endpoint.",code:`@SpringBootApplication
+public class AuthApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(AuthApplication.class, args);
+    }
+}`,ex:["@SpringBootApplication enables auto-config + component scanning.","SpringApplication.run starts the context and the web server."],m:["Thinking Boot is a separate framework from Spring.","Putting the main class in a sub-package so scanning misses everything.","Editing generated config before understanding defaults."],q:[["What does @SpringBootApplication do?",["Creates database tables","Enables auto-config and component scanning","Hashes passwords","Opens a browser"],1,"It combines @Configuration, @EnableAutoConfiguration and @ComponentScan."]],c:["Describe what happens when main() runs, in 3 sentences.","Think: context, beans, server.","Spring starts, scans your classes for components, creates beans in the context, auto-configures from dependencies, and starts embedded Tomcat."]},
+6:{s:"Instead of writing new UserService() yourself, you ask for it and Spring gives it to you.",tm:"Imagine your Controller needs a UserService. Instead of creating it with `new`, Spring creates it and hands it over. That's dependency injection.",an:"A chef doesn't grow vegetables; the supplier delivers them. The chef just declares what's needed.",te:"DI supplies a class's dependencies from outside, preferably via constructor injection. Spring resolves them by type from the ApplicationContext.",w:"Classes stay loosely coupled, easy to test (swap in a mock) and free from managing object lifecycles.",code:`@RestController
+public class AuthController {
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+}`,ex:["final field: the dependency can't change.","Constructor param: Spring injects the AuthService bean here."],m:["Using new for a Spring-managed class.","Field injection with @Autowired (hard to test).","Forgetting @Service so no bean exists."],q:[["Preferred way to inject dependencies?",["Static fields","Constructor injection","Global variables","new keyword"],1,"Constructor injection makes dependencies explicit, final and testable."]],c:["Write a UserService that receives a UserRepository by constructor.","Add a private final field and constructor.","@Service\npublic class UserService {\n    private final UserRepository repo;\n    public UserService(UserRepository repo){ this.repo = repo; }\n}"]},
+10:{s:"A Controller is the front door. It receives the HTTP request and passes work along.",tm:"Think of the Controller as the receptionist: it greets the visitor, figures out who they need, and forwards them. It doesn't do the actual work.",an:"Controller = Receptionist. Service = Manager. Repository = Database clerk. The receptionist routes, the manager decides, the clerk fetches files.",te:"@RestController classes map URLs to methods via @GetMapping/@PostMapping, bind JSON to objects with @RequestBody and return data serialised as JSON.",w:"Something must translate HTTP into Java calls and back, while keeping business logic elsewhere.",code:`@RestController
+@RequestMapping("/auth")
+public class AuthController {
+    private final AuthService authService;
+    public AuthController(AuthService s){ this.authService = s; }
+
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody LoginRequest req) {
+        return authService.login(req);
+    }
+}`,ex:["@RequestMapping sets the base path /auth.","@RequestBody turns JSON into a LoginRequest.","The method only delegates, no logic."],m:["Putting business logic or SQL in controllers.","Returning entities directly instead of DTOs.","Forgetting @RequestBody so fields are null."],q:[["What should a Controller mainly do?",["Hash passwords","Handle HTTP and delegate","Run SQL","Store tokens"],1,"Controllers translate HTTP to method calls and delegate."]],c:["Write a GET /users/{id} endpoint that calls userService.findById.","Use @PathVariable.","@GetMapping(\"/{id}\")\npublic UserDto get(@PathVariable Long id){ return userService.findById(id); }"]},
+11:{s:"A Service contains the application's business logic: the rules of what your app actually does.",tm:"Picture the Service as the manager. The receptionist sends people in; the manager decides what happens and asks the clerk for records.",an:"Controller = Receptionist, Service = Manager, Repository = Database clerk. The manager makes decisions; that's why rules live here.",te:"A @Service class is a Spring bean holding business rules, orchestrating repositories and other components, and defining transaction boundaries.",w:"Keeping rules out of controllers makes them reusable, testable and independent of HTTP.",code:`@Service
+public class UserService {
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+}`,ex:["@Service registers the class as a bean.","Rule: missing user → error. That's business logic."],m:["Writing HTTP code (ResponseEntity) in services.","Skipping the service and calling repositories from controllers.","Giant services doing everything."],q:[["Main responsibility of a Service?",["Handle HTTP requests","Store data","Contain business logic","Render HTML"],2,"Services hold business rules; controllers handle HTTP and repositories handle data."],["Who does a Service usually call for data?",["Browser","Repository","Another client","CSS"],1,"Services use repositories to reach the database."]],c:["Create a UserService with findUserByEmail().","Inject UserRepository, call findByEmail.","See the code example above."]},
+12:{s:"A Repository is the class that reads and writes data in the database.",tm:"It's the clerk in the records room. You ask for 'the user with this email' and it brings the file.",an:"The database clerk: knows where files are stored and fetches or files them.",te:"Extending JpaRepository<Entity,ID> gives CRUD methods automatically; derived queries like findByEmail are generated from method names.",w:"You avoid hand-written SQL and JDBC boilerplate.",code:`public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+    boolean existsByEmail(String email);
+}`,ex:["It's an interface; Spring generates the implementation.","findByEmail → SELECT ... WHERE email = ?"],m:["Writing an implementation class by hand.","Misspelling property names in method names.","Putting business rules here."],q:[["How do you get findByEmail?",["Write SQL manually","Declare it in a JpaRepository interface","Use a Controller","Edit the DB"],1,"Spring Data derives the query from the method name."]],c:["Add existsByEmail to UserRepository.","Return boolean.","boolean existsByEmail(String email);"]},
+23:{s:"A JWT is a signed token the server gives you after login. You show it on every later request instead of logging in again.",tm:"It's a festival wristband: once checked at the gate, you just show it everywhere. Staff verify it's genuine.",an:"A signed wristband proving you're already verified.",te:"A JWT has header.payload.signature (Base64URL). Payload claims (sub, exp, roles) are signed with a secret; the server validates signature and expiry without storing a session.",w:"REST APIs are stateless; JWT lets each request carry proof of identity.",code:`String token = Jwts.builder()
+    .subject(user.getEmail())
+    .claim("role", user.getRole())
+    .expiration(new Date(System.currentTimeMillis() + 3600_000))
+    .signWith(secretKey)
+    .compact();`,ex:["subject = who the token is for.","expiration = token dies after one hour.","signWith = tamper protection."],m:["Putting passwords in the payload (it's readable!).","Never setting expiry.","Hardcoding the secret in source."],q:[["What makes a JWT trustworthy?",["It's encrypted always","Its signature","Its length","Its name"],1,"The signature proves the token wasn't altered."]],c:["List 3 claims you'd put in a login JWT.","Who, role, expiry.","sub (email), role, exp."]}};
+const FL=[["Browser / Postman","Client sends a request.","The client app","Method, URL, headers, JSON body"],["HTTP Request","Request travels to the embedded server.","Tomcat / DispatcherServlet","Raw HTTP"],["Controller","Matched by URL and method.","AuthController","JSON → LoginRequest DTO"],["Service","Business rules run.","AuthService","DTO / domain objects"],["Repository","Data access call.","UserRepository","Query by email"],["Hibernate / JPA","Translates objects to SQL.","Hibernate","Entity ↔ SQL"],["PostgreSQL","Executes SQL, returns rows.","Database","Rows"],["HTTP Response","Result flows back as JSON.","Controller","Status + AuthResponse JSON"]];
+const MAP={Register:[["User","Sends email + password"],["Controller","AuthController receives RegisterRequest"],["Service","Checks email isn't taken"],["Password Encoder","BCrypt hashes the password"],["Repository","userRepository.save()"],["PostgreSQL","Stores the hash, never plain text"]],Login:[["User","Sends credentials"],["Controller","Receives LoginRequest"],["Service","Loads user by email"],["Verify Password","encoder.matches(raw, hash)"],["Generate JWT","Sign token with secret"],["Return JWT","200 + token JSON"]],"Protected request":[["Request + JWT","Authorization: Bearer <token>"],["Security Filter","Intercepts every request"],["Validate JWT","Signature + expiry check"],["Controller","Runs only if valid"],["Response","Data returned, or 401/403"]]};
+const G=[["Spring","Toolbox for building Java apps.","Framework providing IoC container and modules.","Spring MVC, Spring Data","Spring Boot, IoC"],["Spring Boot","Spring with setup done for you.","Auto-config, starters, embedded server.","@SpringBootApplication","Spring"],["IoC","Framework creates and controls objects.","Control of object lifecycle inverted to the container.","Spring creating UserService","DI, Bean"],["DI","Objects are handed what they need.","Dependencies supplied via constructor.","new AuthController(authService)","IoC"],["Bean","An object Spring manages.","Instance registered in the ApplicationContext.","@Service class","ApplicationContext"],["ApplicationContext","Spring's object box.","IoC container holding and wiring beans.","SpringApplication.run()","Bean"],["Controller","Receives requests.","@RestController mapping URLs to methods.","AuthController","Service, REST"],["Service","Business logic.","@Service bean orchestrating rules.","AuthService","Repository"],["Repository","Talks to database.","Spring Data interface.","UserRepository","Entity, JPA"],["REST","URL-based API style.","Stateless resource access over HTTP.","GET /users/1","HTTP, API"],["API","Way programs talk.","Contract of endpoints.","POST /auth/login","REST"],["HTTP","Web's message protocol.","Request/response protocol with methods and status.","200 OK","REST"],["DTO","Data shaped for the API.","Plain object for transfer.","LoginRequest","Entity"],["Entity","Java class = table.","@Entity mapped by JPA.","User","JPA"],["JPA","Standard for object-DB mapping.","Jakarta Persistence spec.","@Entity, @Id","Hibernate"],["Hibernate","The JPA engine.","ORM generating SQL.","save() → INSERT","JPA"],["PostgreSQL","Open-source database.","Relational DBMS.","users table","Database connection"],["Authentication","Proving who you are.","Verifying identity.","Login","Authorization"],["Authorization","What you may do.","Permission checks by role.","ROLE_ADMIN","Authentication"],["JWT","Signed identity token.","header.payload.signature.","Bearer eyJ...","Authentication"],["Password Hashing","One-way scrambling of passwords.","BCrypt with salt.","$2a$10$...","Authentication"]];
+const $=s=>document.querySelector(s);let done=new Set(),tm=false,view="home",n=0;
+try{done=new Set(JSON.parse(localStorage.getItem("sbd")||"[]"));tm=localStorage.getItem("sbt")==="1"}catch(e){}
+const save=()=>{try{localStorage.setItem("sbd",JSON.stringify([...done]));localStorage.setItem("sbt",tm?"1":"0")}catch(e){}};
+const cur=()=>{for(let i=0;i<25;i++)if(!done.has(i))return i;return 24};
+const pct=()=>Math.round(done.size/25*100);
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const hl=c=>esc(c).replace(/(\/\/.*)|("[^"\n]*")|(@\w+)|\b(public|class|private|return|new|void|final|interface|extends|import|static|boolean)\b|\b([A-Z]\w*)\b/g,(m,a,b,c2,d,e)=>a?`<span class=c>${m}</span>`:b?`<span class=s>${m}</span>`:c2?`<span class=a>${m}</span>`:d?`<span class=k>${m}</span>`:`<span class=t>${m}</span>`);
+const code=(c)=>`<div class=ch><span>java</span><button class=g onclick="navigator.clipboard&&navigator.clipboard.writeText(this.closest('div').nextElementSibling.innerText);this.textContent='Copied'">Copy</button></div><pre style="border-radius:0 0 8px 8px">${c.split("\n").map((l,i)=>`<span style="color:#484f58;user-select:none">${String(i+1).padStart(2)}  </span>${hl(l)}`).join("\n")}</pre>`;
+const flow=(arr,id)=>`<div class=fl>${arr.map((x,i)=>`${i?'<div class=ar>↓</div>':''}<div class=nd data-i="${i}" onclick="pick('${id}',${i},this)">${x[0]}</div>`).join("")}</div><div class=info id="i-${id}">Click a step to learn what happens there.</div>`;
+window.pick=(id,i,el)=>{const src=id==="fl"?FL.map(x=>[x[0],`<b>What happens:</b> ${x[1]}<br><b>Class:</b> ${x[2]}<br><b>Data:</b> ${x[3]}`]):id==="ar"?ARCH:MAPX;document.querySelectorAll(`[data-g="${id}"] .nd, #${id}w .nd`).forEach(e=>e.classList.remove("on"));el.parentElement.querySelectorAll(".nd").forEach(e=>e.classList.remove("on"));el.classList.add("on");$("#i-"+id).innerHTML=src[i][1]};
+const ARCH=[["Client","Browser, mobile app or Postman: sends requests."],["Controller","Receives HTTP requests and decides which application operation should run."],["Service","Contains business rules and application logic."],["Repository","Communicates with the database."],["Database","PostgreSQL stores the data permanently."]];
+let MAPX=[];
+window.tab=k=>{MAPX=MAP[k];$("#mapc").innerHTML=flow(MAP[k],"mp");document.querySelectorAll("#mt button").forEach(b=>b.classList.toggle("on",b.textContent===k))};
+window.pick2=0;
+const orig=window.pick;window.pick=(id,i,el)=>{if(id==="mp"){el.parentElement.querySelectorAll(".nd").forEach(e=>e.classList.remove("on"));el.classList.add("on");$("#i-mp").textContent=MAPX[i][1];return}orig(id,i,el)};
+window.ans=(b,qi,j,c,w)=>{const p=b.closest(".q");if(p.dataset.d)return;p.dataset.d=1;p.querySelectorAll(".opt")[c].classList.add("ok");if(j!==c)b.classList.add("no");p.querySelector(".fb").innerHTML=(j===c?"✓ Correct. ":"✗ Not quite. ")+w};
+window.tog=id=>$("#"+id).classList.toggle("hid");
+window.mark=()=>{done.has(n)?done.delete(n):done.add(n);save();go(done.size===25&&!done.has(-1)?"lesson":"lesson",n)};
+window.teach=()=>{tm=!tm;save();render()};
+window.go=(v,i)=>{view=v;if(i!==undefined)n=i;location.hash=v+(i!==undefined?"/"+i:"");render();scrollTo(0,0);$("#sb").classList.remove("open")};
+function side(){$("#sb").innerHTML=`<h4>SPRING BOOT<br>PHASE 1</h4><div class=nv onclick="go('home')"><i>⌂</i>Dashboard</div><div class=nv onclick="go('maps')"><i>◇</i>Diagrams</div><div class=nv onclick="go('gloss')"><i>≡</i>Glossary</div><div class=nv onclick="go('final')"><i>★</i>Phase 1 Complete</div><hr style="border-color:var(--bd)">`+L.map((l,i)=>{const d=done.has(i),c=i===cur();return`<div class="nv ${d?"done":""} ${c&&!d?"cur":""} ${view==="lesson"&&n===i?"on":""}" onclick="go('lesson',${i})"><i>${d?"✓":c?"→":"○"}</i>${String(i+1).padStart(2,"0")} ${l[0]}</div>`}).join("")}
+function home(){const c=cur();return`<div class=tag>PHASE 1 — UNDERSTAND</div><h1>Spring Boot Foundations</h1><p style="color:var(--mu)">“Understand the architecture before writing the authentication system.”</p><div class=card><div style="display:flex;justify-content:space-between"><b>${done.size} / 25 lessons completed</b><b>${pct()}%</b></div><div class=bar><div style="width:${pct()}%"></div></div><p>Current: <b>Lesson ${c+1} — ${L[c][0]}</b><br><span style="color:var(--mu)">≈ 12 min per lesson · about 5 hours total</span></p><button onclick="go('lesson',${c})">Continue Learning →</button></div><h2>Course roadmap</h2><div class=card>${L.map((l,i)=>`<div class="nv ${done.has(i)?"done":""}" onclick="go('lesson',${i})"><i>${done.has(i)?"✓":i===c?"→":"○"}</i>${i+1}. ${l[0]}</div>`).join("")}</div><p class=mono style="color:var(--mu)">Understand → Visualize → Practice → Connect → Build</p>`}
+function lesson(){const l=L[n],f=F[n];const sec=(t,b)=>`<h2 id="${t.replace(/\W/g,"")}">${t}</h2>${b}`;
+let h=`<div class=crumb>Phase 1 → Foundations → Lesson ${n+1}</div><h1>${l[0]}</h1><p style="font-size:17px;color:var(--mu)">${l[1]}</p><button class=g onclick="teach()">🎓 Teach Me: ${tm?"On":"Off"}</button> <button class=g onclick="mark()">${done.has(n)?"✓ Completed (undo)":"Mark as Complete"}</button>`;
+h+=sec("1. Simple Explanation",`<div class=card>${f?(tm?f.tm:f.s):l[1]}</div>`);
+h+=sec("2. Real-World Analogy",`<div class=card>${f?f.an:"Think of a restaurant: Controller = Receptionist, Service = Manager, Repository = Database clerk."}</div>`);
+h+=sec("3. Technical Explanation",`<div class=card>${f?f.te:l[1]}</div>`);
+h+=sec("4. Why Do We Need This?",`<div class=card>${f?f.w:"It keeps responsibilities separated so the authentication app stays readable and testable."}</div>`);
+h+=sec("5. Code Example",f?code(f.code)+`<div class=card><b>Explain Code</b><ul>${f.ex.map(e=>`<li>${e}</li>`).join("")}</ul></div>`:`<div class=card>Code walkthrough for this lesson is planned in a later build.</div>`);
+h+=sec("6. How It Works",`<div class=card>${flow(ARCH,"ar")}</div>`);
+h+=sec("7. In Our Authentication Project",`<div class=card style="border-color:var(--ac)">${l[2]}<br><br><span class=mono style="color:var(--mu)">Login request → AuthController → AuthService → UserRepository → PostgreSQL → JWT → Response</span></div>`);
+h+=sec("8. Common Mistakes",f?`<div class=card><ul>${f.m.map(e=>`<li>${e}</li>`).join("")}</ul></div>`:`<div class=card>Coming in a later build.</div>`);
+h+=sec("9. Quick Check",f?f.q.map((q,qi)=>`<div class="card q"><b>${q[0]}</b>${q[1].map((o,j)=>`<button class=opt onclick="ans(this,${qi},${j},${q[2]},'${q[3].replace(/'/g,"\\'")}')">${"ABCD"[j]}. ${o}</button>`).join("")}<div class=fb></div></div>`).join(""):`<div class=card>Quiz coming in a later build.</div>`);
+h+=sec("10. Mini Challenge",f?`<div class=card><p>${f.c[0]}</p><button class=g onclick="tog('hn')">Show Hint</button> <button class=g onclick="tog('sl')">Show Solution</button><div id=hn class="hid info">${f.c[1]}</div><pre id=sl class=hid style="margin-top:10px">${esc(f.c[2])}</pre></div>`:`<div class=card>Challenge coming in a later build.</div>`);
+h+=sec("Can You Explain It?",`<div class=card>${["What is it?","Why do we need it?","Where will we use it in our authentication project?"].map(q=>`<p><b>${q}</b></p><textarea rows=2 placeholder="Type your own answer..."></textarea>`).join("")}<p><button class=g onclick="tog('sa')">Reveal Suggested Answer</button></p><div id=sa class="hid info"><b>What:</b> ${l[1]}<br><b>Why:</b> ${f?f.w:"Separation of concerns."}<br><b>Auth project:</b> ${l[2]}</div></div>`);
+h+=`<p style="display:flex;justify-content:space-between">${n>0?`<button class=g onclick="go('lesson',${n-1})">← Previous</button>`:"<span></span>"}${n<24?`<button onclick="go('lesson',${n+1})">Next →</button>`:`<button onclick="go('final')">Finish →</button>`}</p>`;return h}
+function maps(){MAPX=MAP.Register;return`<h1>Diagrams</h1><h2>Request flow</h2><div class=card>${flow(FL,"fl")}</div><h2>Authentication concept map</h2><div class=card><div class=tabs id=mt>${Object.keys(MAP).map(k=>`<button onclick="tab('${k}')" class="${k==="Register"?"on":""}">${k}</button>`).join("")}</div><div id=mapc>${flow(MAP.Register,"mp")}</div></div>`}
+function gloss(){return`<h1>Glossary</h1><input id=gq placeholder="Search terms..." oninput="gf()"><div id=gl></div>`}
+window.gf=()=>{const q=($("#gq")||{value:""}).value.toLowerCase();$("#gl").innerHTML=G.filter(g=>g.join(" ").toLowerCase().includes(q)).map(g=>`<div class=card><b>${g[0]}</b><br>${g[1]}<br><span style="color:var(--mu)">${g[2]}</span><br><code>${esc(g[3])}</code><br><span class=tag>Related: ${g[4]}</span></div>`).join("")};
+function fin(){const ok=done.size===25;return`<h1>🎉 Phase 1 Complete</h1>${ok?"":`<div class=card style="border-color:var(--wa)">${25-done.size} lessons remaining. Preview below.</div>`}<p>“You now understand the major building blocks of a Spring Boot backend.”</p><div class=card>${flow([["Frontend",""],["REST API",""],["Controller",""],["Service",""],["Repository",""],["JPA / Hibernate",""],["PostgreSQL",""]].map(x=>[x[0],"Part of the request chain."]),"fx")}</div><h2>What You Learned</h2><div class=card>${["Spring Boot","IoC","Dependency Injection","Beans","Controllers","Services","Repositories","REST APIs","DTOs","JPA/Hibernate","PostgreSQL","Authentication","Authorization","JWT"].map(x=>`<span style="color:var(--ok)">✓</span> ${x} &nbsp;`).join("")}</div><h2>Next: Phase 2 — Build the Authentication Application</h2><div class=card><ol>${["Create Spring Boot project","Configure PostgreSQL","Create User Entity","Create Repository","Registration API","Password hashing","Login API","JWT generation","JWT validation","Spring Security","Protected endpoints","Role-based authorization"].map(x=>`<li>${x}</li>`).join("")}</ol><button onclick="alert('Phase 2 is coming soon!')">Start Phase 2 →</button></div>`}
+function render(){side();const m=$("#m");m.innerHTML=`<button id=mb class=g onclick="document.getElementById('sb').classList.toggle('open')">☰ Lessons</button>`+({home,lesson,maps,gloss,final:fin}[view])();
+if(view==="gloss")gf();
+$("#toc").innerHTML=view==="lesson"?`<b>ON THIS PAGE</b><br>`+["SimpleExplanation:Simple Explanation","RealWorldAnalogy:Real World","TechnicalExplanation:Technical","CodeExample:Code","HowItWorks:Architecture","InOurAuthenticationProject:Authentication Project","QuickCheck:Quiz","MiniChallenge:Mini Challenge"].map(x=>{const[a,b]=x.split(":");return`<a href="#" onclick="event.preventDefault();document.getElementById(document.querySelectorAll('h2').length&&[...document.querySelectorAll('h2')].find(h=>h.id.startsWith('${a.slice(0,5)}')||h.id.endsWith('${a.slice(-5)}')||h.id.includes('${a.slice(0,5)}')).id).scrollIntoView()">${b}</a>`}).join(""):""}
+const h=location.hash.slice(1).split("/");if(h[0]&&["home","lesson","maps","gloss","final"].includes(h[0])){view=h[0];n=Math.min(24,+h[1]||0)}render();
+</script></body></html>

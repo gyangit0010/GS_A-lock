@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 07 — What is JPA / Hibernate?</title>
+<style>
+:root{--bg:#f7f8f5;--card:#fff;--ink:#1c2420;--mute:#5d6b63;--line:#dfe5df;--accent:#2f8f4e;--accent2:#e8f5ec;--warn:#b45309;--code:#101a14;--codeink:#c8f0d2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2}}
+:root[data-theme="dark"]{--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;overflow-x:auto;white-space:nowrap;padding:8px 16px}
+nav a{display:inline-block;margin-right:6px;padding:4px 12px;border-radius:99px;font-size:13px;color:var(--mute);text-decoration:none;border:1px solid var(--line)}
+nav a:hover{color:var(--accent);border-color:var(--accent)}
+.hero{padding:28px 0 8px}.tag{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.15;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 6px}
+section{margin-top:40px}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.eq{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.eq span{background:var(--accent2);border:1px solid var(--accent);border-radius:10px;padding:6px 12px;font-size:14px}
+.eq b{color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--accent2);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+button{font:inherit;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font-size:14px}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.out{min-height:60px}
+.pill{display:inline-block;background:var(--accent2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:3px 4px 3px 0;font-size:13px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.step{flex:1;min-width:38px;height:8px;border-radius:9px;background:var(--line);border:0;padding:0}
+.step.done{background:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:9px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:6px;color:var(--accent)}
+dl{margin:0}dt{font-weight:700;margin-top:12px;color:var(--accent)}dd{margin:2px 0 0;color:var(--ink)}
+.note{border-left:4px solid var(--warn);padding:8px 14px;background:var(--card);border-radius:0 10px 10px 0;margin-top:12px;font-size:15px}
+.score{font-weight:700;color:var(--accent)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.opt.ok{border-color:var(--accent);background:var(--accent2)}.opt.bad{border-color:var(--warn)}
+</style>
+</head>
+<body>
+<nav>
+<a href="#big">Big Idea</a><a href="#stack">The Stack</a><a href="#annotations">Entity Annotations</a><a href="#flow">Data Flow</a><a href="#gloss">Glossary</a><a href="#quiz">Quiz</a>
+</nav>
+<main>
+<div class="hero">
+<div class="tag">Doc 07 · GA_A-lock</div>
+<h1>What is JPA / Hibernate?</h1>
+<p class="sub">An interactive study page for understanding Object-Relational Mapping (ORM), JPA specifications, Hibernate implementations, and entities.</p>
+</div>
+
+<section id="big">
+<h2>The Big Idea: Bridging Java and Databases</h2>
+<p class="sub">Java uses objects, while databases use relational tables. ORM bridges this gap.</p>
+<div class="card">
+<div class="eq"><span>Java Objects</span><b>↕</b><span>ORM (Hibernate)</span><b>↕</b><span>Database Tables (PostgreSQL)</span></div>
+<p style="margin-top:14px">Instead of writing raw JDBC SQL boilerplate for everything, ORM allows you to manipulate Java objects while frameworks like Hibernate handle translating those actions into SQL queries automatically.</p>
+</div>
+</section>
+
+<section id="stack">
+<h2>Understanding the Persistence Stack</h2>
+<p class="sub">Tap a layer to understand its precise role in the architecture:</p>
+<div class="chips" id="stackChips"></div>
+<div class="card out" id="stackOut"></div>
+</section>
+
+<section id="annotations">
+<h2>Core Entity Annotations</h2>
+<p class="sub">Tap an annotation to see how Java classes map to PostgreSQL database tables:</p>
+<div class="chips" id="annChips"></div>
+<div class="card out" id="annOut"></div>
+<pre><code>@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String email;
+    private String password;
+}</code></pre>
+</section>
+
+<section id="flow">
+<h2>Complete Architecture Data Flow</h2>
+<p class="sub">Step through how a user registration request travels from the client all the way down to PostgreSQL:</p>
+<div class="card">
+<div class="steps" id="fSteps"></div>
+<div id="fText" style="min-height:80px"></div>
+<div class="row"><button class="btn ghost" id="fPrev">Back</button><button class="btn" id="fNext">Next Step</button></div>
+</div>
+</section>
+
+<section id="gloss">
+<h2>Glossary</h2>
+<dl class="card">
+<dt>ORM (Object-Relational Mapping)</dt><dd>A technique that connects rich Java objects to relational database tables.</dd>
+<dt>JPA (Java Persistence API)</dt><dd>A specification/set of rules defining how Java objects should be persisted in relational databases.</dd>
+<dt>Hibernate</dt><dd>The most popular open-source JPA implementation framework that executes the actual ORM work.</dd>
+<dt>Spring Data JPA</dt><dd>A Spring framework abstraction layer that simplifies building repository interfaces over JPA.</dd>
+<dt>Entity</dt><dd>A Java class annotated with <code>@Entity</code> representing data stored in a table row.</dd>
+</dl>
+</section>
+
+<section id="quiz">
+<h2>Check Your Understanding</h2>
+<p class="sub">Test your knowledge before moving on to the next module. <span class="score" id="sc"></span></p>
+<div id="qa"></div>
+<h2 style="margin-top:28px;font-size:20px">Quick Multiple Choice</h2>
+<div class="card" id="mc"></div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// Stack explanation chips
+const STACK_LAYERS=[
+  ["Spring Data JPA", "Spring abstraction layer that simplifies repository development and generates standard queries automatically."],
+  ["JPA (Java Persistence API)", "A specification or set of rules defining standard persistence interfaces and annotations."],
+  ["Hibernate", "The actual implementation framework that performs the heavy lifting of ORM and translates Java calls into SQL."],
+  ["PostgreSQL", "The underlying relational database server that physically stores persistent data in tables."]
+];
+const stackChips=$("stackChips");
+STACK_LAYERS.forEach(s=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=s[0];
+  b.onclick=()=>{
+    [...stackChips.children].forEach(k=>k.classList.remove("on"));
+    b.classList.add("on");
+    $("stackOut").innerHTML="<b>"+s[0]+"</b><p style='margin:8px 0 0'>"+s[1]+"</p>";
+  };
+  stackChips.appendChild(b);
+});
+stackChips.children[0].click();
+
+// Annotation chips
+const ANNS=[
+  ["@Entity", "Marks a plain Java class as a JPA entity mapped to a database structure."],
+  ["@Table", "Explicitly specifies the custom database table name (e.g., @Table(name = \"users\"))."],
+  ["@Id", "Designates a specific field as the primary key of the entity."],
+  ["@GeneratedValue", "Configures how primary key values are automatically generated (e.g., auto-incrementing identity)."],
+  ["@Column", "Customizes column constraints like names, nullability, or uniqueness."]
+];
+const annChips=$("annChips");
+ANNS.forEach(a=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=a[0];
+  b.onclick=()=>{
+    [...annChips.children].forEach(k=>k.classList.remove("on"));
+    b.classList.add("on");
+    $("annOut").innerHTML="<b>Annotation: <code>"+a[0]+"</code></b><p style='margin:8px 0 0'>"+a[1]+"</p>";
+  };
+  annChips.appendChild(b);
+});
+annChips.children[0].click();
+
+// Request flow steps
+const FL=[
+  ["1. Client Request", "React frontend sends registration details via POST /api/auth/register."],
+  ["2. Controller & Service", "<code>AuthController</code> receives the payload and passes it to <code>AuthService</code>."],
+  ["3. Repository & Spring Data JPA", "<code>AuthService</code> invokes <code>UserRepository.save(user)</code>."],
+  ["4. JPA & Hibernate", "Hibernate translates the Java User object into an SQL INSERT statement."],
+  ["5. PostgreSQL Database", "PostgreSQL executes the query and stores the persistent user record."]
+];
+let fi=0; const fs=$("fSteps");
+FL.forEach(()=>{
+  const b=document.createElement("button");
+  b.className="step";
+  fs.appendChild(b);
+});
+function rf(){
+  [...fs.children].forEach((b,i)=>b.classList.toggle("done",i<=fi));
+  $("fText").innerHTML="<b>"+FL[fi][0]+"</b><p style='margin:6px 0 0'>"+FL[fi][1]+"</p>";
+}
+$("fNext").onclick=()=>{fi=Math.min(FL.length-1,fi+1);rf();};
+$("fPrev").onclick=()=>{fi=Math.max(0,fi-1);rf();};
+rf();
+
+// QA Collapsibles
+const QA=[
+  ["What is ORM?", "Object-Relational Mapping is a technique for mapping Java objects directly to relational database tables."],
+  ["Is JPA an implementation or a specification?", "JPA is a specification (a set of rules and interfaces), whereas Hibernate is an implementation."],
+  ["What does Hibernate actually do?", "It implements JPA rules and translates object-oriented operations into actual SQL statements executed against the database."],
+  ["Does JPA completely eliminate the need for SQL?", "No, SQL is still executed by the database; Hibernate simply generates much of that SQL for you automatically."]
+];
+let seen=new Set(); const qa=$("qa");
+QA.forEach((q,i)=>{
+  const d=document.createElement("details");
+  d.innerHTML="<summary>"+(i+1)+". "+q[0]+"</summary><p style='margin:0'>"+q[1]+"</p>";
+  d.ontoggle=()=>{ if(d.open) seen.add(i); $("sc").textContent="Revealed "+seen.size+"/"+QA.length; };
+  qa.appendChild(d);
+});
+
+// Quiz Multiple Choice
+const MC=[
+  ["Which component acts as the JPA specification provider / implementation?", ["Spring Boot", "Hibernate", "PostgreSQL"], 1],
+  ["What annotation designates the primary key of an entity?", ["@Entity", "@Table", "@Id"], 2],
+  ["What does ORM stand for?", ["Object Relational Mapping", "Object Request Method", "Online Relational Management"], 0]
+];
+let mi=0, ms=0;
+function rm(){
+  const m=$("mc");
+  if(mi>=MC.length){
+    m.innerHTML="<b>Quiz Completed! Score: "+ms+"/"+MC.length+"</b><div class='row'><button class='btn ghost' id='rs'>Try Again</button></div>";
+    $("rs").onclick=()=>{mi=0; ms=0; rm();};
+    return;
+  }
+  const q=MC[mi];
+  m.innerHTML="<b>Question "+(mi+1)+": "+q[0]+"</b>";
+  q[1].forEach((t,i)=>{
+    const b=document.createElement("button");
+    b.className="opt";
+    b.textContent=t;
+    b.onclick=()=>{
+      m.querySelectorAll(".opt").forEach((o,j)=>{
+        o.disabled=true;
+        if(j==q[2]) o.classList.add("ok");
+      });
+      if(i==q[2]) ms++; else b.classList.add("bad");
+      const n=document.createElement("div");
+      n.className="row";
+      n.innerHTML="<button class='btn'>Next Question</button>";
+      n.firstChild.onclick=()=>{mi++; rm();};
+      m.appendChild(n);
+    };
+    m.appendChild(b);
+  });
+}
+rm();
+</script>
+</body>
+</html>

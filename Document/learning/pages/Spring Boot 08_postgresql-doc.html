@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 08 — What is PostgreSQL?</title>
+<style>
+:root{--bg:#f7f8f5;--card:#fff;--ink:#1c2420;--mute:#5d6b63;--line:#dfe5df;--accent:#2f8f4e;--accent2:#e8f5ec;--warn:#b45309;--code:#101a14;--codeink:#c8f0d2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2}}
+:root[data-theme="dark"]{--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;overflow-x:auto;white-space:nowrap;padding:8px 16px}
+nav a{display:inline-block;margin-right:6px;padding:4px 12px;border-radius:99px;font-size:13px;color:var(--mute);text-decoration:none;border:1px solid var(--line)}
+nav a:hover{color:var(--accent);border-color:var(--accent)}
+.hero{padding:28px 0 8px}.tag{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.15;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 6px}
+section{margin-top:40px}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.eq{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.eq span{background:var(--accent2);border:1px solid var(--accent);border-radius:10px;padding:6px 12px;font-size:14px}
+.eq b{color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--accent2);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+button{font:inherit;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font-size:14px}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.out{min-height:60px}
+.pill{display:inline-block;background:var(--accent2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:3px 4px 3px 0;font-size:13px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.step{flex:1;min-width:38px;height:8px;border-radius:9px;background:var(--line);border:0;padding:0}
+.step.done{background:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:9px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:6px;color:var(--accent)}
+dl{margin:0}dt{font-weight:700;margin-top:12px;color:var(--accent)}dd{margin:2px 0 0;color:var(--ink)}
+.note{border-left:4px solid var(--warn);padding:8px 14px;background:var(--card);border-radius:0 10px 10px 0;margin-top:12px;font-size:15px}
+.score{font-weight:700;color:var(--accent)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.opt.ok{border-color:var(--accent);background:var(--accent2)}.opt.bad{border-color:var(--warn)}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;font-size:14px}
+th{background:var(--accent2);color:var(--ink)}
+</style>
+</head>
+<body>
+<nav>
+<a href="#big">Big Idea</a><a href="#crud">CRUD Operations</a><a href="#keys">Keys & Constraints</a><a href="#flow">Data Flow</a><a href="#gloss">Glossary</a><a href="#quiz">Quiz</a>
+</nav>
+<main>
+<div class="hero">
+<div class="tag">Doc 08 · GA_A-lock</div>
+<h1>What is PostgreSQL?</h1>
+<p class="sub">An interactive study page for understanding persistent relational databases, SQL queries, tables, and constraints.</p>
+</div>
+
+<section id="big">
+<h2>The Big Idea: Persistent Storage</h2>
+<p class="sub">Without a database, all user registration data disappears when the application stops. PostgreSQL provides persistent storage.</p>
+<div class="card">
+<div class="eq"><span>Spring Boot App</span><b>↕</b><span>Hibernate / JPA</span><b>↕</b><span>PostgreSQL (Tables)</span></div>
+<p style="margin-top:14px">PostgreSQL is a powerful open-source Relational Database Management System (RDBMS). It organizes structured data into tables consisting of rows and columns, allowing secure and reliable persistence for user credentials and application records.</p>
+</div>
+</section>
+
+<section id="crud">
+<h2>CRUD Operations & SQL</h2>
+<p class="sub">Tap a CRUD operation to see its corresponding SQL statement used in database management:</p>
+<div class="chips" id="crudChips"></div>
+<div class="card out" id="crudOut"></div>
+</section>
+
+<section id="keys">
+<h2>Keys, Constraints & Table Structure</h2>
+<p class="sub">Tap a database concept to understand how data integrity is enforced:</p>
+<div class="chips" id="keyChips"></div>
+<div class="card out" id="keyOut"></div>
+<div class="card" style="margin-top:12px">
+<b>Example <code>users</code> Table Structure</b>
+<table>
+<tr><th>id</th><th>name</th><th>email</th><th>password_hash</th></tr>
+<tr><td>1</td><td>Gyan</td><td>gyan@example.com</td><td>$2a$10$...</td></tr>
+<tr><td>2</td><td>Asha</td><td>asha@example.com</td><td>$2a$10$...</td></tr>
+</table>
+</div>
+</section>
+
+<section id="flow">
+<h2>Complete Architecture Data Flow</h2>
+<p class="sub">Step through how a registration request travels from React all the way to PostgreSQL:</p>
+<div class="card">
+<div class="steps" id="fSteps"></div>
+<div id="fText" style="min-height:80px"></div>
+<div class="row"><button class="btn ghost" id="fPrev">Back</button><button class="btn" id="fNext">Next Step</button></div>
+</div>
+</section>
+
+<section id="gloss">
+<h2>Glossary</h2>
+<dl class="card">
+<dt>PostgreSQL</dt><dd>An advanced open-source relational database management system (RDBMS).</dd>
+<dt>RDBMS</dt><dd>Relational Database Management System software structured around relational tables.</dd>
+<dt>CRUD</dt><dd>Create, Read, Update, Delete — the four fundamental data operations.</dd>
+<dt>Primary Key</dt><dd>A unique identifier column for each row in a table.</dd>
+<dt>Foreign Key</dt><dd>A column that links/references a primary key in another table to establish relationships.</dd>
+<dt>Transaction</dt><dd>A grouped unit of database work that either fully commits or entirely rolls back.</dd>
+</dl>
+</section>
+
+<section id="quiz">
+<h2>Check Your Understanding</h2>
+<p class="sub">Test your knowledge before moving on to 09. What is Authentication?. <span class="score" id="sc"></span></p>
+<div id="qa"></div>
+<h2 style="margin-top:28px;font-size:20px">Quick Multiple Choice</h2>
+<div class="card" id="mc"></div>
+<p class="sub" style="margin-top:20px">Up next: <b>09 — What is Authentication?</b></p>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// CRUD chips
+const CRUD_OPS=[
+  ["Create", "Adds new records to the database. SQL example: <code>INSERT INTO users (name, email) VALUES ('Gyan', 'gyan@example.com');</code>"],
+  ["Read", "Retrieves existing records from the database. SQL example: <code>SELECT * FROM users WHERE email = 'gyan@example.com';</code>"],
+  ["Update", "Modifies existing record data. SQL example: <code>UPDATE users SET name = 'Gyan Sharma' WHERE id = 1;</code>"],
+  ["Delete", "Removes records from the database. SQL example: <code>DELETE FROM users WHERE id = 1;</code>"]
+];
+const crudChips=$("crudChips");
+CRUD_OPS.forEach(c=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=c[0];
+  b.onclick=()=>{
+    [...crudChips.children].forEach(k=>k.classList.remove("on"));
+    b.classList.add("on");
+    $("crudOut").innerHTML="<b>Operation: "+c[0]+"</b><p style='margin:8px 0 0'>"+c[1]+"</p>";
+  };
+  crudChips.appendChild(b);
+});
+crudChips.children[0].click();
+
+// Keys & Constraints chips
+const KEY_CONCEPTS=[
+  ["Primary Key", "Uniquely identifies each row in a table (e.g., id column). No two rows can share the same primary key."],
+  ["Foreign Key", "A column or set of columns that references the primary key of another table, forming relationships."],
+  ["Unique Constraint", "Ensures all values in a column are distinct (e.g., ensuring no two users register with the same email)."],
+  ["Not Null Constraint", "Ensures that a column cannot store missing or null values."],
+  ["Indexes", "Special lookup structures that speed up data retrieval queries (e.g., indexing email for fast login searches)."],
+  ["Transactions", "Groups operations into atomic units of work that either completely commit or rollback together."]
+];
+const keyChips=$("keyChips");
+KEY_CONCEPTS.forEach(k=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=k[0];
+  b.onclick=()=>{
+    [...keyChips.children].forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    $("keyOut").innerHTML="<b>Concept: "+k[0]+"</b><p style='margin:8px 0 0'>"+k[1]+"</p>";
+  };
+  keyChips.appendChild(b);
+});
+keyChips.children[0].click();
+
+// Request flow steps
+const FL=[
+  ["1. Client Registration", "React frontend sends registration JSON payload to <code>/api/auth/register</code>."],
+  ["2. Controller & Service", "<code>AuthController</code> receives the request and delegates execution to <code>AuthService</code>."],
+  ["3. Repository & JPA", "<code>AuthService</code> invokes <code>UserRepository.save(user)</code> via Spring Data JPA."],
+  ["4. Hibernate & SQL", "Hibernate translates the User object into an SQL <code>INSERT</code> statement."],
+  ["5. PostgreSQL Storage", "PostgreSQL executes the query and durably stores the user record in the <code>users</code> table."]
+];
+let fi=0; const fs=$("fSteps");
+FL.forEach(()=>{
+  const b=document.createElement("button");
+  b.className="step";
+  fs.appendChild(b);
+});
+function rf(){
+  [...fs.children].forEach((b,i)=>b.classList.toggle("done",i<=fi));
+  $("fText").innerHTML="<b>"+FL[fi][0]+"</b><p style='margin:6px 0 0'>"+FL[fi][1]+"</p>";
+}
+$("fNext").onclick=()=>{fi=Math.min(FL.length-1,fi+1);rf();};
+$("fPrev").onclick=()=>{fi=Math.max(0,fi-1);rf();};
+rf();
+
+// QA Collapsibles
+const QA=[
+  ["What is PostgreSQL?", "An open-source relational database management system (RDBMS) that stores and organizes structured data."],
+  ["What does RDBMS stand for?", "Relational Database Management System — software that stores data in related tables and provides management tools."],
+  ["What does CRUD stand for?", "Create, Read, Update, and Delete — the core operations performed on database records."],
+  ["Why do we need a database in an authentication app?", "To provide persistent storage so user accounts are remembered even after the application restarts."]
+];
+let seen=new Set(); const qa=$("qa");
+QA.forEach((q,i)=>{
+  const d=document.createElement("details");
+  d.innerHTML="<summary>"+(i+1)+". "+q[0]+"</summary><p style='margin:0'>"+q[1]+"</p>";
+  d.ontoggle=()=>{ if(d.open) seen.add(i); $("sc").textContent="Revealed "+seen.size+"/"+QA.length; };
+  qa.appendChild(d);
+});
+
+// Quiz Multiple Choice
+const MC=[
+  ["What does SQL stand for?", ["Simple Query Language", "Structured Query Language", "Standard Quality Logic"], 1],
+  ["Which constraint ensures that no two rows share the same value in a specific column?", ["Primary Key / Unique", "Foreign Key", "Not Null"], 0],
+  ["What is the primary purpose of a database transaction?", ["To encrypt user passwords", "To group operations so they fully commit or rollback together", "To render HTML views"], 1]
+];
+let mi=0, ms=0;
+function rm(){
+  const m=$("mc");
+  if(mi>=MC.length){
+    m.innerHTML="<b>Quiz Completed! Score: "+ms+"/"+MC.length+"</b><div class='row'><button class='btn ghost' id='rs'>Try Again</button></div>";
+    $("rs").onclick=()=>{mi=0; ms=0; rm();};
+    return;
+  }
+  const q=MC[mi];
+  m.innerHTML="<b>Question "+(mi+1)+": "+q[0]+"</b>";
+  q[1].forEach((t,i)=>{
+    const b=document.createElement("button");
+    b.className="opt";
+    b.textContent=t;
+    b.onclick=()=>{
+      m.querySelectorAll(".opt").forEach((o,j)=>{
+        o.disabled=true;
+        if(j==q[2]) o.classList.add("ok");
+      });
+      if(i==q[2]) ms++; else b.classList.add("bad");
+      const n=document.createElement("div");
+      n.className="row";
+      n.innerHTML="<button class='btn'>Next Question</button>";
+      n.firstChild.onclick=()=>{mi++; rm();};
+      m.appendChild(n);
+    };
+    m.appendChild(b);
+  });
+}
+rm();
+</script>
+</body>
+</html>

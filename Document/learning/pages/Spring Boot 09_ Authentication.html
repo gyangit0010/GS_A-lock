@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 09 — Authentication</title>
+<style>
+:root{--bg:#f7f8f5;--card:#fff;--ink:#1c2420;--mute:#5d6b63;--line:#dfe5df;--accent:#2f8f4e;--accent2:#e8f5ec;--warn:#b45309;--bad:#b42318;--code:#101a14;--codeink:#c8f0d2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--bad:#f28b82;--code:#0a0f0c;--codeink:#c8f0d2}}
+:root[data-theme="dark"]{--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--bad:#f28b82;--code:#0a0f0c;--codeink:#c8f0d2}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;overflow-x:auto;white-space:nowrap;padding:8px 16px}
+nav a{display:inline-block;margin-right:6px;padding:4px 12px;border-radius:99px;font-size:13px;color:var(--mute);text-decoration:none;border:1px solid var(--line)}
+nav a:hover{color:var(--accent);border-color:var(--accent)}
+.hero{padding:28px 0 8px}.tag{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.15;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 6px}section{margin-top:40px}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--accent2);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+button{font:inherit;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font-size:14px}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.steps{display:flex;gap:6px;margin-bottom:12px}.step{flex:1;height:8px;border-radius:9px;background:var(--line);border:0;padding:0}.step.done{background:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:9px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:6px;color:var(--accent)}
+dl{margin:0}dt{font-weight:700;margin-top:12px;color:var(--accent)}dd{margin:2px 0 0}
+.note{border-left:4px solid var(--warn);padding:8px 14px;background:var(--card);border-radius:0 10px 10px 0;margin-top:12px;font-size:15px}
+.score{font-weight:700;color:var(--accent)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.opt.ok{border-color:var(--accent);background:var(--accent2)}.opt.no{border-color:var(--warn)}
+.big{font-size:18px;font-weight:600;line-height:1.5}
+.vs{display:flex;gap:12px;flex-wrap:wrap}
+.vs>div{flex:1;min-width:220px;border-radius:12px;padding:14px;border:1px solid var(--line)}
+.vs .a{background:var(--accent2);border-color:var(--accent)}
+.pill{display:inline-block;background:var(--accent2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:3px 4px 3px 0;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--mute)}
+</style>
+</head>
+<body>
+<nav><a href="#what">What is it</a><a href="#vs">vs Authorization</a><a href="#flow">Login flow</a><a href="#hash">Hashing</a><a href="#state">Session vs Token</a><a href="#factors">Factors</a><a href="#public">Public vs Protected</a><a href="#gloss">Glossary</a><a href="#quiz">Quiz</a></nav>
+<main>
+<div class="hero"><div class="tag">Doc 09 · GA_A-lock</div><h1>What is Authentication?</h1>
+<p class="sub">The main purpose of GA_A-lock — proving who a user is, before Authorization, JWT and Spring Security build on top of it.</p></div>
+
+<section id="what">
+<h2>1. Proving your identity</h2>
+<div class="card big">Authentication = proving your identity. The application asks "are you really the user associated with this account?"</div>
+<div class="grid" style="margin-top:12px">
+<div class="card"><b>College ID analogy</b><p style="margin:6px 0 0">A guard checks: is this really your ID? Does it belong to you? → identity verified. A web app checks email + password the same way.</p></div>
+<div class="card"><b>Identification vs Authentication</b><p style="margin:6px 0 0">"I am Gyan" (email) is identification. "Prove it" (password) is authentication.</p></div>
+</div>
+</section>
+
+<section id="vs">
+<h2>2. Authentication vs Authorization</h2>
+<p class="sub">The single most important distinction in this whole series.</p>
+<div class="vs">
+<div class="a"><b>Authentication</b><p style="margin:6px 0 0">Who are you? → establishes <b>identity</b>.<br>e.g. "You are Gyan."</p></div>
+<div><b>Authorization</b><p style="margin:6px 0 0">What are you allowed to do? → establishes <b>permissions</b>.<br>e.g. "Gyan has admin rights."</p></div>
+</div>
+<div class="note">Authentication always comes first — you can't decide what someone's allowed to do until you know who they are. Authorization is Doc 10.</div>
+</section>
+
+<section id="flow">
+<h2>3. What happens during login</h2>
+<p class="sub">Step through the request for <code>POST /api/auth/login</code>.</p>
+<div class="card">
+<div class="steps" id="fSteps"></div>
+<div id="fText" style="min-height:110px"></div>
+<div class="row"><button class="btn ghost" id="fPrev">Back</button><button class="btn" id="fNext">Next step</button></div>
+</div>
+<div class="card" style="margin-top:12px"><pre><code>POST /api/auth/login
+{
+  "email": "gyan@example.com",
+  "password": "secret123"
+}</code></pre>
+<table><tr><th>id</th><th>email</th><th>password_hash</th></tr><tr><td>1</td><td>gyan@example.com</td><td>$2a$10$...</td></tr></table>
+</div>
+</section>
+
+<section id="hash">
+<h2>4. Hashing vs Encryption</h2>
+<p class="sub">Passwords are never stored directly — tap to compare the two.</p>
+<div class="chips" id="hChips"></div>
+<div class="card" id="hOut"></div>
+<div class="note">Password verification never "reads" the original password back — it re-checks the submitted password against the stored hash, and only says match / no match.</div>
+</section>
+
+<section id="state">
+<h2>5. Staying authenticated: Session vs Token</h2>
+<p class="sub">After login, how does the server know future requests belong to the same user?</p>
+<div class="chips" id="sChips"></div>
+<div class="card" id="sOut"></div>
+<div class="note">GA_A-lock uses the JWT-based (token) approach — covered in full in Doc 11.</div>
+</section>
+
+<section id="factors">
+<h2>6. Authentication factors</h2>
+<p class="sub">Tap a factor category.</p>
+<div class="chips" id="ffChips"></div>
+<div class="card" id="ffOut"></div>
+<p class="sub" style="margin-top:10px">Combining factors is <b>multi-factor authentication (MFA)</b>. GA_A-lock's first version uses just email + password.</p>
+</section>
+
+<section id="public">
+<h2>7. Public vs protected endpoints</h2>
+<p class="sub">Tap an endpoint to see which category it falls in.</p>
+<div class="chips" id="epChips"></div>
+<div class="card" id="epOut"></div>
+</section>
+
+<section id="gloss">
+<h2>Glossary</h2>
+<dl class="card">
+<dt>Authentication</dt><dd>Verifying who a user is.</dd>
+<dt>Authorization</dt><dd>Deciding what an authenticated user can do (Doc 10).</dd>
+<dt>Password hash</dt><dd>A one-way transformation of a password, stored instead of the raw password.</dd>
+<dt>Session-based auth</dt><dd>Server stores session state; client holds a session identifier.</dd>
+<dt>Token-based auth</dt><dd>Server issues a token (e.g. JWT) the client sends on every request; no server-side session storage.</dd>
+<dt>MFA</dt><dd>Multi-factor authentication — combining more than one factor (know / have / are).</dd>
+<dt>401 Unauthorized</dt><dd>The typical status code for failed authentication.</dd>
+</dl>
+</section>
+
+<section id="quiz">
+<h2>Check your understanding</h2>
+<p class="sub">Answer in your own words first, then open the card. <span class="score" id="sc"></span></p>
+<div id="qa"></div>
+<h2 style="margin-top:28px;font-size:20px">Quick multiple choice</h2>
+<div class="card" id="mc"></div>
+<p class="sub" style="margin-top:20px">Up next: <b>10 — What is Authorization?</b></p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function chips(id,labels,fn){const c=$(id);labels.forEach((l,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=l;b.onclick=()=>{[...c.children].forEach(k=>k.classList.remove("on"));b.classList.add("on");fn(i)};c.appendChild(b)});c.children[0].click()}
+
+const FL=[["1. User submits credentials","Email + password sent to POST /api/auth/login."],
+["2. Controller receives them","AuthController hands the request body to the Service."],
+["3. Service processes login","AuthService coordinates the rest of this flow."],
+["4. Find the user","UserRepository looks the user up by email in PostgreSQL."],
+["5. Verify password","The submitted password is checked against the stored password_hash — not compared as plain text."],
+["6. Authentication succeeds","Identity is established. A JWT is generated and returned to the client."]];
+let fi=0;const fs=$("fSteps");FL.forEach((_,i)=>{const b=document.createElement("button");b.className="step";b.onclick=()=>{fi=i;rf()};fs.appendChild(b)});
+function rf(){[...fs.children].forEach((b,i)=>b.classList.toggle("done",i<=fi));$("fText").innerHTML="<b>"+FL[fi][0]+"</b><p style='margin:6px 0 0'>"+FL[fi][1]+"</p>"}
+$("fNext").onclick=()=>{fi=Math.min(FL.length-1,fi+1);rf()};$("fPrev").onclick=()=>{fi=Math.max(0,fi-1);rf()};rf();
+
+chips("hChips",["Hashing (passwords)","Encryption"],i=>{
+if(i==0)$("hOut").innerHTML="<b>Hashing</b><pre><code>Password → hash function → hash</code></pre><p style='margin:0'>One-way. Designed so the original password can't practically be recovered from the hash — only verified against a new attempt.</p>";
+else $("hOut").innerHTML="<b>Encryption</b><pre><code>Plaintext → encryption → ciphertext → decryption → plaintext</code></pre><p style='margin:0'>Reversible with the correct key. Not what you use for stored passwords — you never need to get the original password back.</p>";
+});
+
+chips("sChips",["Session-based","Token-based (JWT)"],i=>{
+if(i==0)$("sOut").innerHTML="<b>Session-based</b><pre><code>Login → server creates session → client gets a session ID\n→ client sends session ID with future requests</code></pre><p style='margin:0'>The server stores state for every logged-in user.</p>";
+else $("sOut").innerHTML="<b>Token-based (JWT)</b><pre><code>Login → credentials verified → JWT generated\n→ client stores JWT → sends it with future requests</code></pre><p style='margin:0'>The server stores nothing — the token itself proves identity. This is GA_A-lock's approach.</p>";
+});
+
+const FF=[["Something you know","Password, PIN, security question — what GA_A-lock's first version uses."],["Something you have","Phone, security key, authenticator device."],["Something you are","Fingerprint, face, or other biometric characteristic."]];
+chips("ffChips",FF.map(x=>x[0]),i=>{$("ffOut").innerHTML="<b>"+FF[i][0]+"</b><p style='margin:6px 0 0'>"+FF[i][1]+"</p>"});
+
+const EP=[["POST /api/auth/register","<span class='pill'>Public</span><p style='margin:8px 0 0'>Anyone needs to be able to create an account.</p>"],
+["POST /api/auth/login","<span class='pill'>Public</span><p style='margin:8px 0 0'>Anyone needs to be able to attempt login.</p>"],
+["GET /api/profile","<span class='pill' style='border-color:var(--warn)'>Protected</span><p style='margin:8px 0 0'>Requires authentication — only the authenticated user should see their own profile.</p>"],
+["GET /api/users/me","<span class='pill' style='border-color:var(--warn)'>Protected</span><p style='margin:8px 0 0'>Requires a valid JWT to identify who is asking.</p>"]];
+chips("epChips",EP.map(x=>x[0]),i=>{$("epOut").innerHTML="<b>"+EP[i][0]+"</b>"+EP[i][1]});
+
+const QA=[["What is authentication?","The process of verifying the identity of a user or system."],
+["Why do applications need authentication?","To make sure only the right person can access protected resources or actions."],
+["Difference between authentication and authorization?","Authentication asks who you are; authorization asks what you're allowed to do, after identity is known."],
+["Difference between registration and authentication?","Registration creates an account; authentication verifies an existing account's identity, e.g. at login."],
+["Why shouldn't passwords be stored directly?","If the database were exposed, raw passwords would be exposed too; a hash keeps the original unrecoverable."],
+["What is password hashing?","A one-way transformation of a password, stored instead of the password itself, used for verification not recovery."],
+["Difference between hashing and encryption?","Encryption is reversible with a key; hashing is one-way, meant only for verification."],
+["What happens during a login request?","Credentials are received, the user is found, the password is verified against the stored hash, and on success a JWT is issued."],
+["What does it mean for a user to be authenticated?","The application has evidence the presented credentials belong to a specific, identified user."],
+["Difference between identification and authentication?","Identification is claiming an identity ('I am Gyan'); authentication is proving it ('prove it')."],
+["What are authentication factors?","Categories of proof: something you know, something you have, something you are."],
+["What is token-based authentication?","The server issues a token (e.g. JWT) after login; the client sends it on future requests instead of the server storing session state."],
+["What is JWT at a high level?","A token format for representing claims (like identity) between parties, used in token-based authentication."],
+["Which GA_A-lock endpoints might be public?","/api/auth/register and /api/auth/login."],
+["Which endpoints might need authentication?","/api/profile, /api/users/me, and other resources tied to a specific user."],
+["What does HTTP 401 generally represent?","Failed or missing authentication."],
+["Why will GA_A-lock use Spring Security?","It provides a mature, tested framework for authentication, authorization, password handling and request protection instead of hand-rolled checks."],
+["How does authentication fit into the GA_A-lock architecture?","Spring Security authenticates the request before it reaches the Controller, Service, Repository and PostgreSQL layers."]];
+const seen=new Set();
+QA.forEach((q,i)=>{const d=document.createElement("details");d.innerHTML="<summary>"+(i+1)+". "+q[0]+"</summary><p style='margin:0'>"+q[1]+"</p>";d.ontoggle=()=>{if(d.open)seen.add(i);$("sc").textContent="Revealed "+seen.size+"/"+QA.length};$("qa").appendChild(d)});
+
+const MC=[["What does authentication establish?",["Permissions","Identity","Database schema"],1],["Why store a password hash instead of the raw password?",["Hashes take less storage","It's one-way, so the original can't be recovered from a leak","Databases require it"],1],["GA_A-lock's chosen approach to staying authenticated after login is...",["Session-based","Token-based (JWT)","Neither, re-login every request"],1],["A failed login attempt typically returns...",["200","401","403"],1]];
+let mi=0,ms=0;
+function rm(){const m=$("mc");if(mi>=MC.length){m.innerHTML="<b>Done! Score: "+ms+"/"+MC.length+"</b><div class='row'><button class='btn ghost' id='rs'>Try again</button></div>";$("rs").onclick=()=>{mi=0;ms=0;rm()};return}
+const q=MC[mi];m.innerHTML="<b>"+q[0]+"</b>";q[1].forEach((t,i)=>{const b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=()=>{m.querySelectorAll(".opt").forEach((o,j)=>{o.disabled=true;if(j==q[2])o.classList.add("ok")});if(i==q[2])ms++;else b.classList.add("no");const n=document.createElement("div");n.className="row";n.innerHTML="<button class='btn'>Next</button>";n.firstChild.onclick=()=>{mi++;rm()};m.appendChild(n)};m.appendChild(b)})}
+rm();
+</script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 05 — What is a Service?</title>
+<style>
+:root{--bg:#f7f8f5;--card:#fff;--ink:#1c2420;--mute:#5d6b63;--line:#dfe5df;--accent:#2f8f4e;--accent2:#e8f5ec;--warn:#b45309;--code:#101a14;--codeink:#c8f0d2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2}}
+:root[data-theme="dark"]{--bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;--accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;overflow-x:auto;white-space:nowrap;padding:8px 16px}
+nav a{display:inline-block;margin-right:6px;padding:4px 12px;border-radius:99px;font-size:13px;color:var(--mute);text-decoration:none;border:1px solid var(--line)}
+nav a:hover{color:var(--accent);border-color:var(--accent)}
+.hero{padding:28px 0 8px}.tag{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.15;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 6px}
+section{margin-top:40px}.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.eq{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.eq span{background:var(--accent2);border:1px solid var(--accent);border-radius:10px;padding:6px 12px;font-size:14px}
+.eq b{color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--accent2);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+button{font:inherit;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font-size:14px}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.out{min-height:60px}
+.pill{display:inline-block;background:var(--accent2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:3px 4px 3px 0;font-size:13px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.step{flex:1;min-width:38px;height:8px;border-radius:9px;background:var(--line);border:0;padding:0}
+.step.done{background:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:9px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:6px;color:var(--accent)}
+dl{margin:0}dt{font-weight:700;margin-top:12px;color:var(--accent)}dd{margin:2px 0 0;color:var(--ink)}
+.note{border-left:4px solid var(--warn);padding:8px 14px;background:var(--card);border-radius:0 10px 10px 0;margin-top:12px;font-size:15px}
+.score{font-weight:700;color:var(--accent)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.opt.ok{border-color:var(--accent);background:var(--accent2)}.opt.bad{border-color:var(--warn)}
+</style>
+</head>
+<body>
+<nav>
+<a href="#big">Big Idea</a><a href="#vs">Controller vs Service</a><a href="#logic">Business Logic</a><a href="#code">Auth Service</a><a href="#arch">Architecture Flow</a><a href="#rules">Dos & Don'ts</a><a href="#gloss">Glossary</a><a href="#quiz">Quiz</a>
+</nav>
+<main>
+<div class="hero">
+<div class="tag">Doc 05 · GA_A-lock</div>
+<h1>What is a Service?</h1>
+<p class="sub">An interactive study page for understanding business logic encapsulation, dependency separation, and the Service layer in Spring Boot.</p>
+</div>
+
+<section id="big">
+<h2>The Big Idea: What is a Service?</h2>
+<p class="sub">The Service layer sits right between your HTTP Controllers and data Repositories, executing application rules.</p>
+<div class="card">
+<div class="eq"><span>Controller</span><b>+</b><span>Business Rules</span><b>+</b><span>Repositories</span><b>=</b><span style="background:var(--accent);color:#fff">Service Layer</span></div>
+<p style="margin-top:14px">In simple terms: <b>Controller receives the request. Service decides what should happen.</b> For our <code>GA_A-lock</code> authentication application, the Service handles user registration checks, credential validations, password hashing, and token generation.</p>
+</div>
+</section>
+
+<section id="vs">
+<h2>Controller vs Service Responsibilities</h2>
+<p class="sub">Tap a component category to compare what belongs where:</p>
+<div class="chips" id="compChips"></div>
+<div class="card out" id="compOut"></div>
+</section>
+
+<section id="logic">
+<h2>What is Business Logic?</h2>
+<p class="sub">Business logic defines the core rules of your application. Click to see what handles what in <code>GA_A-lock</code>:</p>
+<div class="chips" id="logicChips"></div>
+<div class="card out" id="logicOut"></div>
+</section>
+
+<section id="code">
+<h2>Creating and Wiring a Service</h2>
+<p class="sub">Spring manages services as beans using <code>@Service</code> and injects dependencies through constructors.</p>
+<pre><code>@Service
+public class AuthService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+
+    public AuthService(UserRepository userRepository, 
+                       PasswordEncoder passwordEncoder, 
+                       JwtService jwtService) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        // 1. Find user, 2. Check password, 3. Generate JWT
+        return new LoginResponse("mock-jwt-token");
+    }
+}</code></pre>
+<div class="note">Notice how clean this is: the service handles core authentication logic without dealing with HTTP endpoints or direct SQL queries.</div>
+</section>
+
+<section id="arch">
+<h2>Complete Request & Architecture Flow</h2>
+<p class="sub">Step through a complete login call from client to database and back:</p>
+<div class="card">
+<div class="steps" id="fSteps"></div>
+<div id="fText" style="min-height:80px"></div>
+<div class="row"><button class="btn ghost" id="fPrev">Back</button><button class="btn" id="fNext">Next Step</button></div>
+</div>
+</section>
+
+<section id="rules">
+<h2>Common Mistakes & Separation of Concerns</h2>
+<p class="sub">Keep your architecture maintainable by avoiding common pitfalls:</p>
+<div class="grid">
+<div class="card" style="border-color: var(--warn)">
+<b style="color: var(--warn)">❌ Bad Practice</b>
+<ul style="margin:6px 0 0; padding-left:20px">
+<li>Stuffing business rules & SQL logic inside Controllers</li>
+<li>Injecting raw repositories into controllers directly</li>
+<li>Manually instantiating services with <code>new AuthService()</code> instead of letting Spring inject them</li>
+</ul>
+</div>
+<div class="card" style="border-color: var(--accent)">
+<b style="color: var(--accent)">✅ Good Practice (Separation of Concerns)</b>
+<ul style="margin:6px 0 0; padding-left:20px">
+<li>Controller handles HTTP payload & requests</li>
+<li>Service coordinates workflows & validations</li>
+<li>Repository deals strictly with database communication</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section id="gloss">
+<h2>Glossary</h2>
+<dl class="card">
+<dt>Service Layer</dt><dd>The architectural layer that implements business logic and application rules.</dd>
+<dt>@Service</dt><dd>A Spring stereotype annotation indicating that a class is a business service component managed in the Spring container.</dd>
+<dt>Business Logic</dt><dd>The custom rules, verifications, and workflows that dictate how application data is processed.</dd>
+<dt>Separation of Concerns</dt><dd>A design principle dividing a computer program into distinct sections so each section addresses a separate concern.</dd>
+</dl>
+</section>
+
+<section id="quiz">
+<h2>Check Your Understanding</h2>
+<p class="sub">Test your knowledge before moving on to 06. What is a Repository?. <span class="score" id="sc"></span></p>
+<div id="qa"></div>
+<h2 style="margin-top:28px;font-size:20px">Quick Multiple Choice</h2>
+<div class="card" id="mc"></div>
+<p class="sub" style="margin-top:20px">Up next: <b>06 — What is a Repository?</b></p>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// Controller vs Service comparative chips
+const COMPS=[
+  ["Controller Responsibilities", "Deals primarily with HTTP requests, responses, URL mappings, status codes, path variables, request bodies, and JSON formatting."],
+  ["Service Responsibilities", "Deals with application business logic, validation decisions, coordinating repositories, password checks, and building core functionality."]
+];
+const compChips=$("compChips");
+COMPS.forEach(c=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=c[0];
+  b.onclick=()=>{
+    [...compChips.children].forEach(k=>k.classList.remove("on"));
+    b.classList.add("on");
+    $("compOut").innerHTML="<b>"+c[0]+"</b><p style='margin:8px 0 0'>"+c[1]+"</p>";
+  };
+  compChips.appendChild(b);
+});
+compChips.children[0].click();
+
+// Business logic examples
+const LOGICS=[
+  ["Email Uniqueness", "Ensuring that during registration, no other user account already exists with the same email address."],
+  ["Password Hashing", "Encrypting raw passwords securely before they are saved to the persistent database storage."],
+  ["Credential Matching", "Verifying during login that the submitted password matches the secure hashed password stored in PostgreSQL."],
+  ["JWT Generation", "Creating and signing a JSON Web Token once authentication succeeds so subsequent requests remain authorized."]
+];
+const logicChips=$("logicChips");
+LOGICS.forEach(l=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=l[0];
+  b.onclick=()=>{
+    [...logicChips.children].forEach(k=>k.classList.remove("on"));
+    b.classList.add("on");
+    $("logicOut").innerHTML="<b>Rule: "+l[0]+"</b><p style='margin:8px 0 0'>"+l[1]+"</p>";
+  };
+  logicChips.appendChild(b);
+});
+logicChips.children[0].click();
+
+// Request flow steps
+const FL=[
+  ["1. HTTP Request", "React frontend sends an HTTP POST request to <code>/api/auth/login</code> with JSON credentials."],
+  ["2. Controller Entry", "<code>AuthController</code> intercepts the request, extracts the body using <code>@RequestBody</code>, and forwards it."],
+  ["3. Service Execution", "<code>AuthService</code> handles the business logic: verifies user presence, checks password hash, and creates tokens."],
+  ["4. Repository Lookup", "<code>AuthService</code> calls <code>UserRepository</code> to query persistent user records from PostgreSQL."],
+  ["5. Response Return", "The result flows back up through the layers, returning a clean HTTP status code and response payload back to the client."]
+];
+let fi=0; const fs=$("fSteps");
+FL.forEach(()=>{
+  const b=document.createElement("button");
+  b.className="step";
+  fs.appendChild(b);
+});
+function rf(){
+  [...fs.children].forEach((b,i)=>b.classList.toggle("done",i<=fi));
+  $("fText").innerHTML="<b>"+FL[fi][0]+"</b><p style='margin:6px 0 0'>"+FL[fi][1]+"</p>";
+}
+$("fNext").onclick=()=>{fi=Math.min(FL.length-1,fi+1);rf();};
+$("fPrev").onclick=()=>{fi=Math.max(0,fi-1);rf();};
+rf();
+
+// QA Collapsibles
+const QA=[
+  ["What is a Service?", "It is the architectural layer responsible for implementing the business logic of an application, sitting between controllers and repositories."],
+  ["Why do we need a Service layer?", "It prevents controllers from becoming bloated with business code, promotes separation of concerns, and makes applications modular and testable."],
+  ["What does @Service do?", "It tells Spring that the annotated class contains business logic and should be managed as a Spring bean for dependency injection."],
+  ["What is business logic?", "The core rules, workflows, validation checks, and security operations that define how application data should be processed."],
+  ["Why shouldn't the Service handle HTTP details?", "Services should focus purely on business execution, while HTTP mappings, parameters, and status codes are strictly the domain of Controllers."]
+];
+let seen=new Set(); const qa=$("qa");
+QA.forEach((q,i)=>{
+  const d=document.createElement("details");
+  d.innerHTML="<summary>"+(i+1)+". "+q[0]+"</summary><p style='margin:0'>"+q[1]+"</p>";
+  d.ontoggle=()=>{ if(d.open) seen.add(i); $("sc").textContent="Revealed "+seen.size+"/"+QA.length; };
+  qa.appendChild(d);
+});
+
+// Quiz Multiple Choice
+const MC=[
+  ["Which annotation tells Spring to manage a class as a business service bean?", ["@Controller", "@Service", "@Repository"], 1],
+  ["Where should application business logic and validation rules primarily live?", ["Inside the Controller layer", "Inside the Service layer", "Directly inside database triggers"], 1],
+  ["What is the primary benefit of Separation of Concerns?", ["It reduces the number of files in your project", "It keeps each layer focused on a single responsibility, making code easier to maintain", "It completely eliminates the need for databases"], 1]
+];
+let mi=0, ms=0;
+function rm(){
+  const m=$("mc");
+  if(mi>=MC.length){
+    m.innerHTML="<b>Quiz Completed! Score: "+ms+"/"+MC.length+"</b><div class='row'><button class='btn ghost' id='rs'>Try Again</button></div>";
+    $("rs").onclick=()=>{mi=0; ms=0; rm();};
+    return;
+  }
+  const q=MC[mi];
+  m.innerHTML="<b>Question "+(mi+1)+": "+q[0]+"</b>";
+  q[1].forEach((t,i)=>{
+    const b=document.createElement("button");
+    b.className="opt";
+    b.textContent=t;
+    b.onclick=()=>{
+      m.querySelectorAll(".opt").forEach((o,j)=>{
+        o.disabled=true;
+        if(j==q[2]) o.classList.add("ok");
+      });
+      if(i==q[2]) ms++; else b.classList.add("bad");
+      const n=document.createElement("div");
+      n.className="row";
+      n.innerHTML="<button class='btn'>Next Question</button>";
+      n.firstChild.onclick=()=>{mi++; rm();};
+      m.appendChild(n);
+    };
+    m.appendChild(b);
+  });
+}
+rm();
+</script>
+</body>
+</html>

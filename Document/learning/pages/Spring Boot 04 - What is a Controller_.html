@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 04 — What is a Controller?</title>
+<style>
+:root{
+  --bg:#f7f8f5;--card:#fff;--ink:#1c2420;--mute:#5d6b63;--line:#dfe5df;
+  --accent:#2f8f4e;--accent2:#e8f5ec;--warn:#b45309;--code:#101a14;--codeink:#c8f0d2;
+  --get:#2563eb;--post:#16a34a;--put:#d97706;--delete:#dc2626;--patch:#7c3aed;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;
+    --accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1512;--card:#17201b;--ink:#e6efe8;--mute:#93a599;--line:#26332b;
+  --accent:#5fd087;--accent2:#16281d;--warn:#f0b35a;--code:#0a0f0c;--codeink:#c8f0d2;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,60px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:background .3s,color .3s}
+main{max-width:920px;margin:0 auto;padding:20px 16px 80px}
+
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:10;display:flex;align-items:center;justify-content:space-between;padding:8px 16px;backdrop-filter:blur(8px)}
+.nav-links{overflow-x:auto;white-space:nowrap;display:flex;gap:6px;padding:4px 0}
+nav a{display:inline-block;padding:4px 12px;border-radius:99px;font-size:13px;color:var(--mute);text-decoration:none;border:1px solid var(--line);transition:all .2s}
+nav a:hover{color:var(--accent);border-color:var(--accent)}
+.theme-btn{background:var(--card);border:1px solid var(--line);color:var(--ink);padding:4px 10px;border-radius:99px;font-size:13px;cursor:pointer;flex-shrink:0}
+
+.hero{padding:32px 0 12px}
+.tag{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.15;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 6px}
+section{margin-top:48px}
+.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.02)}
+.eq{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.eq span{background:var(--accent2);border:1px solid var(--accent);border-radius:10px;padding:6px 12px;font-size:14px}
+.eq b{color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+pre{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--accent2);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+button{font:inherit;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font-size:14px;transition:all .2s}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.out{min-height:80px}
+.pill{display:inline-block;background:var(--accent2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin:3px 4px 3px 0;font-size:13px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.step{flex:1;min-width:38px;height:8px;border-radius:9px;background:var(--line);border:0;padding:0;cursor:pointer}
+.step.done{background:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:9px;font-weight:600;transition:opacity .2s}
+.btn:hover{opacity:0.9}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+
+/* Simulator styles */
+.sim-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.method-btn{padding:6px 12px;border-radius:8px;font-weight:700;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.method-btn.get.active{background:var(--get);color:#fff;border-color:var(--get)}
+.method-btn.post.active{background:var(--post);color:#fff;border-color:var(--post)}
+.method-btn.put.active{background:var(--put);color:#fff;border-color:var(--put)}
+.method-btn.patch.active{background:var(--patch);color:#fff;border-color:var(--patch)}
+.method-btn.delete.active{background:var(--delete);color:#fff;border-color:var(--delete)}
+
+.sim-input-group{margin-bottom:12px}
+.sim-input-group label{display:block;font-size:13px;font-weight:600;color:var(--mute);margin-bottom:4px}
+.sim-input-group input, .sim-input-group textarea, .sim-input-group select{width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+.sim-console{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px;font-family:ui-monospace,monospace;font-size:13px;max-height:220px;overflow-y:auto;margin-top:10px}
+
+/* Code Generator styles */
+.gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:768px){.gen-grid{grid-template-columns:1fr}}
+.gen-form input{width:100%;padding:8px;margin-bottom:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:6px;color:var(--accent)}
+dl{margin:0}dt{font-weight:700;margin-top:12px;color:var(--accent)}dd{margin:2px 0 0;color:var(--ink)}
+.note{border-left:4px solid var(--warn);padding:10px 14px;background:var(--card);border-radius:0 10px 10px 0;margin-top:12px;font-size:15px}
+.score{font-weight:700;color:var(--accent)}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);transition:all .2s}
+.opt.ok{border-color:var(--accent);background:var(--accent2);font-weight:600}
+.opt.bad{border-color:var(--delete);background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-links">
+    <a href="#big">Big Idea</a>
+    <a href="#simulator">Live REST Sim</a>
+    <a href="#generator">Code Generator</a>
+    <a href="#mappings">Mappings</a>
+    <a href="#params">Data Extraction</a>
+    <a href="#service">Architecture</a>
+    <a href="#flow">Request Flow</a>
+    <a href="#quiz">Quiz</a>
+  </div>
+  <button class="theme-btn" id="themeToggle" title="Toggle Light/Dark Theme">🌙 Dark</button>
+</nav>
+
+<main>
+<div class="hero">
+  <div class="tag">Doc 04 · GA_A-lock Study Hub</div>
+  <h1>What is a Controller?</h1>
+  <p class="sub">An interactive, dynamic guide to Spring Boot REST Controllers, request mapping annotations, DTO payloads, and clean architecture separation.</p>
+</div>
+
+<section id="big">
+  <h2>The Big Idea: Controller as the API Entry Point</h2>
+  <p class="sub">Where does a REST request actually enter our Spring Boot application? Through the Controller layer.</p>
+  <div class="card">
+    <div class="eq"><span>HTTP Request</span><b>+</b><span>@RestController</span><b>+</b><span>@RequestMapping</span><b>=</b><span style="background:var(--accent);color:#fff">REST Entry Point</span></div>
+    <p style="margin-top:14px">A <b>Controller</b> is a Spring component responsible for handling incoming HTTP requests from clients (like our React frontend) and returning structured HTTP responses (usually JSON).</p>
+    <pre><code>React Frontend ──(POST /api/auth/login)──> [ AuthController ] ──> [ AuthService ]</code></pre>
+  </div>
+</section>
+
+<section id="simulator">
+  <h2>Interactive REST Route Simulator</h2>
+  <p class="sub">Test simulated requests against a virtual Spring Boot Controller. Select an HTTP verb, configure URL & payload, and inspect the response & execution flow!</p>
+  <div class="card">
+    <div class="sim-toolbar" id="simToolbar">
+      <button class="method-btn get active" data-method="GET" data-route="/api/users/42" data-body="">GET /api/users/{id}</button>
+      <button class="method-btn post" data-method="POST" data-route="/api/auth/login" data-body='{ "email": "gyan@example.com", "password": "secret" }'>POST /api/auth/login</button>
+      <button class="method-btn put" data-method="PUT" data-route="/api/users/1" data-body='{ "name": "Gyan Updated" }'>PUT /api/users/{id}</button>
+      <button class="method-btn patch" data-method="PATCH" data-route="/api/users/1" data-body='{ "role": "ADMIN" }'>PATCH /api/users/{id}</button>
+      <button class="method-btn delete" data-method="DELETE" data-route="/api/users/1" data-body="">DELETE /api/users/{id}</button>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="sim-input-group">
+          <label>HTTP Method & Route URL</label>
+          <div style="display:flex;gap:6px">
+            <input type="text" id="simMethodInput" value="GET" readonly style="width:90px;font-weight:bold;text-align:center">
+            <input type="text" id="simRouteInput" value="/api/users/42">
+          </div>
+        </div>
+        <div class="sim-input-group" id="simBodyGroup" style="display:none">
+          <label>Request Body JSON (@RequestBody DTO)</label>
+          <textarea id="simBodyInput" rows="4"></textarea>
+        </div>
+        <button class="btn" id="simSendBtn" style="width:100%;margin-top:6px">Send Simulated Request ⚡</button>
+      </div>
+
+      <div>
+        <label style="font-size:13px;font-weight:600;color:var(--mute)">Execution & Response Console</label>
+        <div class="sim-console" id="simConsole">Click "Send Simulated Request" to execute route flow...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="generator">
+  <h2>Spring Boot Code Generator</h2>
+  <p class="sub">Customize your controller parameters below and instantly generate ready-to-run Java Spring Boot code!</p>
+  <div class="card">
+    <div class="gen-grid">
+      <div class="gen-form">
+        <label style="font-size:13px;font-weight:600;color:var(--mute)">Controller Name</label>
+        <input type="text" id="genClassName" value="ProductController">
+
+        <label style="font-size:13px;font-weight:600;color:var(--mute)">Base Request Mapping Prefix</label>
+        <input type="text" id="genPrefix" value="/api/products">
+
+        <label style="font-size:13px;font-weight:600;color:var(--mute)">Service Bean Name</label>
+        <input type="text" id="genService" value="ProductService">
+
+        <button class="btn ghost" id="genCopyBtn" style="width:100%;margin-top:8px">Copy Generated Code 📋</button>
+      </div>
+      <div>
+        <label style="font-size:13px;font-weight:600;color:var(--mute)">Generated Java Source Code</label>
+        <pre><code id="genOutput">Loading generator...</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mappings">
+  <h2>Mapping HTTP Requests (@GetMapping, @PostMapping, etc.)</h2>
+  <p class="sub">Tap an annotation below to see its exact mapping behavior:</p>
+  <div class="chips" id="mapChips"></div>
+  <div class="card out" id="mapOut"></div>
+</section>
+
+<section id="params">
+  <h2>Extracting Request Data (@PathVariable, @RequestParam, @RequestBody)</h2>
+  <p class="sub">Understand how Spring extracts parameters from URLs, query strings, and JSON payloads:</p>
+  <div class="chips" id="dataChips"></div>
+  <div class="card out" id="dataOut"></div>
+</section>
+
+<section id="service">
+  <h2>Controller → Service Architecture Separation</h2>
+  <p class="sub">Controllers must only handle HTTP routing and delegate business logic to the Service layer.</p>
+  <div class="grid">
+    <div class="card">
+      <b style="color:var(--accent)">What Controllers Should Do</b>
+      <ul style="margin:6px 0 0;padding-left:18px">
+        <li>Receive incoming HTTP requests</li>
+        <li>Extract path/query/body variables</li>
+        <li>Invoke Service methods</li>
+        <li>Return ResponseEntity & JSON</li>
+      </ul>
+    </div>
+    <div class="card">
+      <b style="color:var(--warn)">What Controllers Should NOT Do</b>
+      <ul style="margin:6px 0 0;padding-left:18px">
+        <li>Write complex business algorithms</li>
+        <li>Talk directly to the Database Repository</li>
+        <li>Handle raw password hashing / DB transactions</li>
+        <li>Generate JWT tokens inline</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="flow">
+  <h2>Complete Request Flow Animator</h2>
+  <p class="sub">Step through what happens when an HTTP request reaches our application:</p>
+  <div class="card">
+    <div class="steps" id="fSteps"></div>
+    <div id="fText" style="min-height:80px"></div>
+    <div class="row">
+      <button class="btn ghost" id="fPrev">Back</button>
+      <button class="btn" id="fNext">Next Step</button>
+    </div>
+  </div>
+</section>
+
+<section id="gloss">
+  <h2>Glossary</h2>
+  <dl class="card">
+    <dt>Controller</dt><dd>The HTTP/API entry point layer that receives client requests and returns responses.</dd>
+    <dt>@RestController</dt><dd>Combines <code>@Controller</code> and <code>@ResponseBody</code> for building JSON REST APIs.</dd>
+    <dt>DTO (Data Transfer Object)</dt><dd>A plain Java object used to receive and encapsulate incoming request body payloads.</dd>
+    <dt>@RequestBody</dt><dd>Instructs Spring to deserialize incoming JSON payloads into Java DTO objects automatically.</dd>
+    <dt>ResponseEntity</dt><dd>Provides precise programmatic control over HTTP status codes (200, 201, 400, etc.).</dd>
+  </dl>
+</section>
+
+<section id="quiz">
+  <h2>Check Your Understanding</h2>
+  <p class="sub">Test your knowledge before moving to Doc 05. <span class="score" id="sc"></span></p>
+  <div id="qa"></div>
+  <h2 style="margin-top:32px;font-size:20px">Interactive Multiple Choice Quiz</h2>
+  <div class="card" id="mc"></div>
+  <p class="sub" style="margin-top:20px">Up next: <b>05 — What is a Service?</b></p>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// Theme Toggle
+const themeToggle=$("themeToggle");
+themeToggle.onclick=()=>{
+  const current=document.documentElement.getAttribute("data-theme");
+  const next=current==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",next);
+  themeToggle.textContent=next==="dark"?"☀️ Light":"🌙 Dark";
+};
+
+// Interactive REST Simulator Logic
+const simToolbar=$("simToolbar");
+const simMethodInput=$("simMethodInput");
+const simRouteInput=$("simRouteInput");
+const simBodyGroup=$("simBodyGroup");
+const simBodyInput=$("simBodyInput");
+const simSendBtn=$("simSendBtn");
+const simConsole=$("simConsole");
+
+let activeSimMethod="GET";
+
+simToolbar.querySelectorAll(".method-btn").forEach(btn=>{
+  btn.onclick=()=>{
+    simToolbar.querySelectorAll(".method-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    activeSimMethod=btn.dataset.method;
+    simMethodInput.value=activeSimMethod;
+    simRouteInput.value=btn.dataset.route;
+    simBodyInput.value=btn.dataset.body;
+    if(activeSimMethod==="GET"||activeSimMethod==="DELETE"){
+      simBodyGroup.style.display="none";
+    } else {
+      simBodyGroup.style.display="block";
+    }
+  };
+});
+
+simSendBtn.onclick=()=>{
+  const method=simMethodInput.value;
+  const route=simRouteInput.value;
+  const body=simBodyInput.value;
+
+  simConsole.innerHTML=`<span style="color:#60a5fa">[CLIENT]</span> Sending ${method} ${route}...\n`;
+  setTimeout(()=>{
+    simConsole.innerHTML+=`<span style="color:#34d399">[DISPATCHER SERVLET]</span> Routed to Controller mapping...\n`;
+  },250);
+  setTimeout(()=>{
+    if(method==="POST"||method==='PUT'||method==='PATCH'){
+      simConsole.innerHTML+=`<span style="color:#f472b6">[@RequestBody]</span> Deserialized JSON payload into DTO object.\n`;
+    }
+    simConsole.innerHTML+=`<span style="color:#a78bfa">[SERVICE LAYER]</span> Executing business rules & database operation...\n`;
+  },550);
+  setTimeout(()=>{
+    let status="200 OK";
+    let resp='{ "status": "success", "message": "Operation executed successfully via Controller" }';
+    if(method==="POST" && route.includes("register")){
+      status="201 Created";
+      resp='{ "id": 101, "email": "gyan@example.com", "status": "Registered successfully" }';
+    } else if(method==="POST" && route.includes("login")){
+      status="200 OK";
+      resp='{ "token": "eyJhbGciOiJIUzI1Ni... (JWT Token generated)", "role": "USER" }';
+    } else if(method==="DELETE"){
+      status="204 No Content";
+      resp='(Resource successfully deleted)';
+    }
+    simConsole.innerHTML+=`<span style="color:#34d399">[RESPONSE]</span> HTTP Status: <b style="color:#fbbf24">${status}</b>\n`;
+    simConsole.innerHTML+=`<span style="color:#e2e8f0">Response Body:\n${resp}</span>`;
+    simConsole.scrollTop=simConsole.scrollHeight;
+  },900);
+};
+
+// Dynamic Code Generator Logic
+const genClassName=$("genClassName");
+const genPrefix=$("genPrefix");
+const genService=$("genService");
+const genOutput=$("genOutput");
+const genCopyBtn=$("genCopyBtn");
+
+function updateCodeGenerator(){
+  const cName=genClassName.value.trim()||"ProductController";
+  const prefix=genPrefix.value.trim()||"/api/products";
+  const sName=genService.value.trim()||"ProductService";
+  const sVar=sName.charAt(0).toLowerCase()+sName.slice(1);
+
+  const code=`package com.example.app.controller;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import java.util.List;
+
+@RestController
+@RequestMapping("${prefix}")
+public class ${cName} {
+
+    private final ${sName} ${sVar};
+
+    public ${cName}(${sName} ${sVar}) {
+        this.${sVar} = ${sVar};
+    }
+
+    @GetMapping
+    public ResponseEntity<List<String>> getAll() {
+        return ResponseEntity.ok(${sVar}.findAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<String> create(@RequestBody Object request) {
+        return ResponseEntity.status(201).body(${sVar}.create(request));
+    }
+}
+`;
+  genOutput.textContent=code;
+}
+
+[genClassName,genPrefix,genService].forEach(el=>el.oninput=updateCodeGenerator);
+updateCodeGenerator();
+
+genCopyBtn.onclick=()=>{
+  const text=genOutput.textContent;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      genCopyBtn.textContent="Copied Successfully! ✓";
+      setTimeout(()=>genCopyBtn.textContent="Copy Generated Code 📋",2000);
+    });
+  } else {
+    const ta=document.createElement("textarea");
+    ta.value=text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    genCopyBtn.textContent="Copied Successfully! ✓";
+    setTimeout(()=>genCopyBtn.textContent="Copy Generated Code 📋",2000);
+  }
+};
+
+// HTTP Mappings data
+const MAPS=[
+  ["@GetMapping", "Used for fetching data via HTTP GET requests. Example: @GetMapping(\"/api/users\") retrieves all users."],
+  ["@PostMapping", "Used for creating resources or submitting auth payloads (POST requests). Essential for registration & login."],
+  ["@PutMapping", "Used for complete resource replacement updates via HTTP PUT requests."],
+  ["@PatchMapping", "Used for partial resource updates via HTTP PATCH requests."],
+  ["@DeleteMapping", "Used for deleting resources via HTTP DELETE requests (e.g., DELETE /api/users/{id})."]
+];
+const mapChips=$("mapChips");
+MAPS.forEach(m=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=m[0];
+  b.onclick=()=>{
+    [...mapChips.children].forEach(k=>k.classList.remove("on"));
+    b.classList.add("on");
+    $("mapOut").innerHTML="<b>"+m[0]+"</b><p style='margin:8px 0 0'>"+m[1]+"</p>";
+  };
+  mapChips.appendChild(b);
+});
+mapChips.children[0].click();
+
+// Data Extraction data
+const DATA=[
+  ["@PathVariable", "Captures variable values embedded directly inside the URI path (e.g., /api/users/{id} -> Long id)."],
+  ["@RequestParam", "Captures query string parameters sent after the question mark (e.g., /api/users?role=ADMIN)."],
+  ["@RequestBody", "Tells Spring to read and convert incoming JSON HTTP request bodies into strongly-typed Java DTO objects."],
+  ["DTO (Data Transfer Object)", "Plain Java classes (like LoginRequest) designed specifically to encapsulate request payloads safely."]
+];
+const dataChips=$("dataChips");
+DATA.forEach(d=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=d[0];
+  b.onclick=()=>{
+    [...dataChips.children].forEach(k=>k.classList.remove("on"));
+    b.classList.add("on");
+    $("dataOut").innerHTML="<b>"+d[0]+"</b><p style='margin:8px 0 0'>"+d[1]+"</p>";
+  };
+  dataChips.appendChild(b);
+});
+dataChips.children[0].click();
+
+// Request Flow steps
+const FL=[
+  ["1. Client Request", "React frontend sends an HTTP POST request to <code>/api/auth/login</code> containing JSON credentials."],
+  ["2. Controller Entry", "<code>AuthController</code> intercepts the request via <code>@PostMapping(\"/login\")</code> and uses <code>@RequestBody</code> to map JSON into a <code>LoginRequest</code> DTO."],
+  ["3. Service Delegation", "The Controller hands over the payload to <code>AuthService</code> to execute authentication rules."],
+  ["4. Repository & Database", "<code>AuthService</code> uses <code>UserRepository</code> to fetch user details from PostgreSQL and verifies credentials."],
+  ["5. HTTP Response", "The result flows back up through the Service and Controller, returning a clean JSON response and status code back to React."]
+];
+let fi=0; const fs=$("fSteps");
+FL.forEach(()=>{
+  const b=document.createElement("button");
+  b.className="step";
+  fs.appendChild(b);
+});
+function rf(){
+  [...fs.children].forEach((b,i)=>b.classList.toggle("done",i<=fi));
+  $("fText").innerHTML="<b>"+FL[fi][0]+"</b><p style='margin:6px 0 0'>"+FL[fi][1]+"</p>";
+}
+$("fNext").onclick=()=>{fi=Math.min(FL.length-1,fi+1);rf();};
+$("fPrev").onclick=()=>{fi=Math.max(0,fi-1);rf();};
+rf();
+
+// QA Collapsibles
+const QA=[
+  ["What is a Controller?", "It is the HTTP/API entry point layer responsible for receiving client requests, reading data, calling services, and returning responses."],
+  ["What does @RestController do?", "It combines @Controller and @ResponseBody, telling Spring that the class handles REST requests and automatically writes return values into the HTTP response body as JSON."],
+  ["What is the difference between @PathVariable and @RequestParam?", "@PathVariable extracts variables embedded directly in the URI path (e.g., /users/{id}), whereas @RequestParam captures query string parameters (e.g., /users?role=ADMIN)."],
+  ["Why shouldn't we put business logic inside Controllers?", "Putting business logic inside controllers makes them bloated, difficult to maintain, hard to test, and violates architectural separation of concerns."],
+  ["What is a DTO?", "A Data Transfer Object (like LoginRequest) is a simple Java class used to receive and encapsulate incoming request data safely."]
+];
+let seen=new Set(); const qa=$("qa");
+QA.forEach((q,i)=>{
+  const d=document.createElement("details");
+  d.innerHTML="<summary>"+(i+1)+". "+q[0]+"</summary><p style='margin:0'>"+q[1]+"</p>";
+  d.ontoggle=()=>{ if(d.open) seen.add(i); $("sc").textContent="Revealed "+seen.size+"/"+QA.length; };
+  qa.appendChild(d);
+});
+
+// Quiz Multiple Choice
+const MC=[
+  ["Which annotation is used to map an HTTP POST request?", ["@GetMapping", "@PostMapping", "@DeleteMapping"], 1],
+  ["What annotation converts an incoming JSON body into a Java object?", ["@PathVariable", "@RequestParam", "@RequestBody"], 2],
+  ["What is the primary responsibility of the Controller layer?", ["Executing database queries and hashing passwords", "Handling HTTP requests and delegating to services", "Rendering HTML template views"], 1]
+];
+let mi=0, ms=0;
+function rm(){
+  const m=$("mc");
+  if(mi>=MC.length){
+    m.innerHTML="<b>Quiz Completed! Score: "+ms+"/"+MC.length+"</b><div class='row'><button class='btn ghost' id='rs'>Try Again</button></div>";
+    $("rs").onclick=()=>{mi=0; ms=0; rm();};
+    return;
+  }
+  const q=MC[mi];
+  m.innerHTML="<b>Question "+(mi+1)+": "+q[0]+"</b>";
+  q[1].forEach((t,i)=>{
+    const b=document.createElement("button");
+    b.className="opt";
+    b.textContent=t;
+    b.onclick=()=>{
+      m.querySelectorAll(".opt").forEach((o,j)=>{
+        o.disabled=true;
+        if(j==q[2]) o.classList.add("ok");
+      });
+      if(i==q[2]) ms++; else b.classList.add("bad");
+      const n=document.createElement("div");
+      n.className="row";
+      n.innerHTML="<button class='btn'>Next Question</button>";
+      n.firstChild.onclick=()=>{mi++; rm();};
+      m.appendChild(n);
+    };
+    m.appendChild(b);
+  });
+}
+rm();
+</script>
+</body>
+</html>
