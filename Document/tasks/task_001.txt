@@ -1,0 +1,59 @@
+You should have:
+- Java 17+
+- Maven
+- PostgreSQL
+- IntelliJ / VS Code / Codespaces
+- Postman
+
+
+https://start.spring.io
+
+Project: Maven
+Language: Java
+Spring Boot: Current stable version
+
+Group:
+com.authapp
+
+Artifact:
+authapp
+
+Name:
+AuthApp
+
+Package:
+com.authapp
+
+Packaging:
+Jar
+
+Java:
+25
+
+add these dependencies 
+
+Spring Web
+Spring Data JPA
+PostgreSQL Driver
+Validation
+Spring Security
+
+
+## Your first checkpoint
+
+authapp/
+│
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── authapp/
+│   │   │           └── AuthAppApplication.java
+│   │   │
+│   │   └── resources/
+│   │       └── application.properties
+│   │
+│   └── test/
+│
+├── pom.xml
+└── mvnw
